@@ -1,0 +1,9 @@
+{
+    "name": "strict-schema",
+    "version": "0.0.1",
+    "description": "Typescript schema DSL with inferred types",
+    "main": "dist/index.js",
+    "dependencies": {
+        "typescript": "^4.4.4"
+    }
+}
