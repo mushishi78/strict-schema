@@ -6,39 +6,34 @@ export interface NumberSchema
 
 export interface NumberProperties {
   mustBeInteger: boolean;
-  include: Array<number | NumberRange>;
+  allow: Array<number | NumberRange>;
   exclude: Array<number | NumberRange>;
 }
 
 export const defaultNumberProperties: NumberProperties = {
   mustBeInteger: false,
-  include: [],
+  allow: [],
   exclude: [NaN, Infinity, -Infinity],
 };
 
-export function number(properties?: Partial<NumberProperties>): NumberSchema {
+export function numberSchema(
+  properties?: Partial<NumberProperties>
+): NumberSchema {
   return {
     schemaType: "NumberSchema",
     properties: { ...defaultNumberProperties, ...properties },
   };
 }
 
-export function integer(): NumberSchema {
-  return number({ mustBeInteger: true });
-}
-
-export function positiveNumber(): NumberSchema {
-  return number({ include: [positiveRange] });
-}
-
-export function positiveInteger(): NumberSchema {
-  return number({ include: [positiveRange], mustBeInteger: true });
-}
-
-export function negativeNumber(): NumberSchema {
-  return number({ include: [negativeRange] });
-}
-
-export function negativeInteger(): NumberSchema {
-  return number({ include: [negativeRange], mustBeInteger: true });
-}
+export const number = numberSchema();
+export const integer = numberSchema({ mustBeInteger: true });
+export const positiveNumber = numberSchema({ allow: [positiveRange] });
+export const negativeNumber = numberSchema({ allow: [negativeRange] });
+export const positiveInteger = numberSchema({
+  allow: [positiveRange],
+  mustBeInteger: true,
+});
+export const negativeInteger = numberSchema({
+  allow: [negativeRange],
+  mustBeInteger: true,
+});

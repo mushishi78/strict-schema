@@ -8,8 +8,8 @@ export type NumberFailureType =
   | "unexpected-undefined"
   | "expected-number"
   | "expected-integer"
-  | "expected-include"
-  | "expected-exclude";
+  | "not-allowed"
+  | "value-excluded";
 
 export function validateNumber(
   schema: NumberSchema,
@@ -35,19 +35,19 @@ export function validateNumber(
   }
 
   if (
-    schema.properties.include.length > 0 &&
-    !isIn(schema.properties.include, json)
+    schema.properties.allow.length > 0 &&
+    !isIn(schema.properties.allow, json)
   ) {
-    const message = `Expected ${json} to be in included: ${schema.properties.include}`;
-    failures = addFailure(failures, "expected-include", message);
+    const message = `Number ${json} is not in: ${schema.properties.allow}`;
+    failures = addFailure(failures, "not-allowed", message);
   }
 
   if (
     schema.properties.exclude.length > 0 &&
     isIn(schema.properties.exclude, json)
   ) {
-    const message = `Expected ${json} to not be in exluded: ${schema.properties.exclude}`;
-    failures = addFailure(failures, "expected-exclude", message);
+    const message = `Number ${json} has been exluded. Excluded values: ${schema.properties.exclude}`;
+    failures = addFailure(failures, "value-excluded", message);
   }
 
   return failures;

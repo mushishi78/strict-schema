@@ -1,3 +1,4 @@
+import { BooleanSchema } from "./boolean-schema";
 import { NumberSchema } from "./number-schema";
 
 export interface Schema {
@@ -5,4 +6,4 @@ export interface Schema {
   definition: SchemaDefinition;
 }
 
-export type SchemaDefinition = NumberSchema;
+export type SchemaDefinition = NumberSchema | BooleanSchema;
