@@ -1,5 +1,5 @@
-import { Failure, noFailures, oneFailure, addFailure } from "./failure";
-import { BooleanSchema } from "./boolean-schema";
+import { Failure, noFailures, oneFailure, addFailure } from "../lib/failure";
+import { BooleanSchema } from "../schema/boolean-schema";
 
 export type BooleanFailureType =
   | "unexpected-null"

@@ -1,4 +1,4 @@
-import { NumberRange, positiveRange, negativeRange } from "./number-range";
+import { NumberRange, positiveRange, negativeRange } from "../lib/number-range";
 import { SchemaType } from "./schema-type";
 
 export interface NumberSchema

@@ -1,7 +1,7 @@
-import { Failure, noFailures, oneFailure, addFailure } from "./failure";
-import { areNumbersEqual } from "./number";
-import { isInNumberRange, NumberRange } from "./number-range";
-import { NumberSchema } from "./number-schema";
+import { Failure, noFailures, oneFailure, addFailure } from "../lib/failure";
+import { areNumbersEqual } from "../lib/number";
+import { isInNumberRange, NumberRange } from "../lib/number-range";
+import { NumberSchema } from "../schema/number-schema";
 
 export type NumberFailureType =
   | "unexpected-null"
