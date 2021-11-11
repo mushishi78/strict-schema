@@ -1,5 +1,6 @@
 import { Failure, noFailures, oneFailure, addFailure } from "../lib/failure";
 import { BooleanSchema } from "../schema/boolean-schema";
+import { checkForNullOrUndefined } from "./validate-helpers";
 
 export type BooleanFailureType =
   | "unexpected-null"
@@ -13,31 +14,18 @@ export function validateBoolean(
 ): Failure<BooleanFailureType>[] {
   const { allow } = schema.properties;
 
-  if (json === null) {
-    if (allow.includes(null)) return noFailures();
+  return checkForNullOrUndefined(allow, json, () => {
+    if (typeof json !== "boolean") {
+      return oneFailure("expected-boolean", `Expected ${json} to be a boolean`);
+    }
 
-    return oneFailure("unexpected-null", `Expected boolean, got null`);
-  }
+    let failures = noFailures<BooleanFailureType>();
 
-  if (json === undefined) {
-    if (allow.includes(undefined)) return noFailures();
+    if (allow.length > 0 && !allow.includes(json)) {
+      const message = `Boolean ${json} is not in: ${allow}`;
+      failures = addFailure(failures, "not-allowed", message);
+    }
 
-    return oneFailure(
-      "unexpected-undefined",
-      `Expected boolean, got undefined`
-    );
-  }
-
-  if (typeof json !== "boolean") {
-    return oneFailure("expected-boolean", `Expected ${json} to be a boolean`);
-  }
-
-  let failures = noFailures<BooleanFailureType>();
-
-  if (allow.length > 0 && !allow.includes(json)) {
-    const message = `Boolean ${json} is not in: ${allow}`;
-    failures = addFailure(failures, "not-allowed", message);
-  }
-
-  return failures;
+    return failures;
+  });
 }
