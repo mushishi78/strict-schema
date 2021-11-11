@@ -8,18 +8,19 @@ export type NumberFailureType =
   | "unexpected-undefined"
   | "expected-number"
   | "expected-integer"
-  | "not-allowed"
-  | "value-excluded";
+  | "not-allowed";
 
 export function validateNumber(
   schema: NumberSchema,
   json: unknown
 ): Failure<NumberFailureType>[] {
   if (json === null) {
+    if (schema.properties.allow.includes(null)) return noFailures();
     return oneFailure("unexpected-null", `Expected number, got null`);
   }
 
   if (json === undefined) {
+    if (schema.properties.allow.includes(undefined)) return noFailures();
     return oneFailure("unexpected-undefined", `Expected number, got undefined`);
   }
 
@@ -42,19 +43,16 @@ export function validateNumber(
     failures = addFailure(failures, "not-allowed", message);
   }
 
-  if (
-    schema.properties.exclude.length > 0 &&
-    isIn(schema.properties.exclude, json)
-  ) {
-    const message = `Number ${json} has been exluded. Excluded values: ${schema.properties.exclude}`;
-    failures = addFailure(failures, "value-excluded", message);
-  }
-
   return failures;
 }
 
-function isIn(list: Array<number | NumberRange>, num: number) {
+function isIn(
+  list: Array<number | NumberRange | null | undefined>,
+  num: number
+) {
   for (const member of list) {
+    if (member == null) continue;
+
     if (typeof member === "number") {
       if (areNumbersEqual(member, num)) return true;
     } else {

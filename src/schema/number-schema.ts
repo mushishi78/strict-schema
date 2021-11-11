@@ -6,14 +6,12 @@ export interface NumberSchema
 
 export interface NumberProperties {
   mustBeInteger: boolean;
-  allow: Array<number | NumberRange>;
-  exclude: Array<number | NumberRange>;
+  allow: Array<number | NumberRange | undefined | null>;
 }
 
 export const defaultNumberProperties: NumberProperties = {
   mustBeInteger: false,
-  allow: [],
-  exclude: [NaN, Infinity, -Infinity],
+  allow: [[-Infinity, "< n <", Infinity], undefined, null],
 };
 
 export function numberSchema(

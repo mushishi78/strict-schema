@@ -6,7 +6,7 @@
         "sourceMap": true,
         "strict": true,
         "declaration": true,
-        "lib": ["DOM", "ES2015"]
+        "lib": ["DOM", "ES2016"]
     },
     "include": ["src"]
 }

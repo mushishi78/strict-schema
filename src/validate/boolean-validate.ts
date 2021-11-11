@@ -14,13 +14,13 @@ export function validateBoolean(
   const { allow } = schema.properties;
 
   if (json === null) {
-    if (allow.indexOf(null) >= 0) return noFailures();
+    if (allow.includes(null)) return noFailures();
 
     return oneFailure("unexpected-null", `Expected boolean, got null`);
   }
 
   if (json === undefined) {
-    if (allow.indexOf(undefined) >= 0) return noFailures();
+    if (allow.includes(undefined)) return noFailures();
 
     return oneFailure(
       "unexpected-undefined",
@@ -34,7 +34,7 @@ export function validateBoolean(
 
   let failures = noFailures<BooleanFailureType>();
 
-  if (allow.length > 0 && allow.indexOf(json) === -1) {
+  if (allow.length > 0 && !allow.includes(json)) {
     const message = `Boolean ${json} is not in: ${allow}`;
     failures = addFailure(failures, "not-allowed", message);
   }
