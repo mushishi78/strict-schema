@@ -12,11 +12,11 @@ import {
 function testValidateBoolean(
   deepEqual: DeepEqualAssertion,
   schema: BooleanSchema,
-  json: unknown,
+  value: unknown,
   failureTypes: BooleanFailureType[]
 ) {
   deepEqual(
-    validateBoolean(schema, json).map((t) => t.type),
+    validateBoolean(schema, value).map((t) => t.type),
     failureTypes
   );
 }

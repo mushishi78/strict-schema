@@ -13,24 +13,24 @@ export type NumberFailureType =
 
 export function validateNumber(
   schema: NumberSchema,
-  json: unknown
+  value: unknown
 ): Failure<NumberFailureType>[] {
   const { allow, mustBeInteger } = schema.properties;
 
-  return checkForNullOrUndefined(allow, json, () => {
-    if (typeof json !== "number") {
-      return oneFailure("expected-number", `Expected ${json} to be a number`);
+  return checkForNullOrUndefined(allow, value, () => {
+    if (typeof value !== "number") {
+      return oneFailure("expected-number", `Expected ${value} to be a number`);
     }
 
     let failures = noFailures<NumberFailureType>();
 
-    if (mustBeInteger && !Number.isInteger(json)) {
-      const message = `Expected ${json} to be an integer`;
+    if (mustBeInteger && !Number.isInteger(value)) {
+      const message = `Expected ${value} to be an integer`;
       failures = addFailure(failures, "expected-integer", message);
     }
 
-    if (allow.length > 0 && !isIn(allow, json)) {
-      const message = `Number ${json} is not in: ${allow}`;
+    if (allow.length > 0 && !isIn(allow, value)) {
+      const message = `Number ${value} is not in: ${allow}`;
       failures = addFailure(failures, "not-allowed", message);
     }
 

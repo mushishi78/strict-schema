@@ -10,19 +10,22 @@ export type BooleanFailureType =
 
 export function validateBoolean(
   schema: BooleanSchema,
-  json: unknown
+  value: unknown
 ): Failure<BooleanFailureType>[] {
   const { allow } = schema.properties;
 
-  return checkForNullOrUndefined(allow, json, () => {
-    if (typeof json !== "boolean") {
-      return oneFailure("expected-boolean", `Expected ${json} to be a boolean`);
+  return checkForNullOrUndefined(allow, value, () => {
+    if (typeof value !== "boolean") {
+      return oneFailure(
+        "expected-boolean",
+        `Expected ${value} to be a boolean`
+      );
     }
 
     let failures = noFailures<BooleanFailureType>();
 
-    if (allow.length > 0 && !allow.includes(json)) {
-      const message = `Boolean ${json} is not in: ${allow}`;
+    if (allow.length > 0 && !allow.includes(value)) {
+      const message = `Boolean ${value} is not in: ${allow}`;
       failures = addFailure(failures, "not-allowed", message);
     }
 
