@@ -1,5 +1,5 @@
 import test, { DeepEqualAssertion } from "ava";
-import { BooleanFailureType, validateBoolean } from "./boolean-validate";
+import { BooleanFailureType, validateBoolean } from "./validate-boolean";
 
 import {
   boolean,
