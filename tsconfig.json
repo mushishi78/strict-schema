@@ -6,7 +6,8 @@
         "sourceMap": true,
         "strict": true,
         "declaration": true,
-        "lib": ["DOM", "ES2016"]
+        "lib": ["DOM", "ES2016"],
+        "moduleResolution": "node"
     },
     "include": ["src"]
 }
