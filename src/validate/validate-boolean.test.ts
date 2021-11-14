@@ -1,6 +1,6 @@
 import test from "ava";
 import { validateBoolean } from "./validate-boolean";
-import { notAllowed, unexpectedTypeOf, valid } from "./failure";
+import { notAllowed, unexpectedTypeOf, valid } from "./validation";
 
 import {
   boolean,

@@ -2,13 +2,13 @@ import { areNumbersEqual } from "../lib/number";
 import { isInNumberRange, NumberRange } from "../lib/number-range";
 import { NumberSchema } from "../schema/number-schema";
 import { allowIncludes, collectFailures } from "./validate-helpers";
-import { notAllowed, unexpectedTypeOf, valid, Failure } from "./failure";
+import { notAllowed, unexpectedTypeOf, valid, Validation } from "./validation";
 
-export interface ExpectedInteger extends Failure<"ExpectedInteger"> {
+export interface ExpectedInteger extends Validation<"ExpectedInteger"> {
   value: number;
 }
 export const expectedInteger = (value: number): ExpectedInteger => ({
-  failureType: "ExpectedInteger",
+  validationType: "ExpectedInteger",
   value,
 });
 
