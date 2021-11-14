@@ -1,82 +1,108 @@
-import test, { DeepEqualAssertion } from "ava";
-import { BooleanFailureType, validateBoolean } from "./validate-boolean";
+import test from "ava";
+import { validateBoolean } from "./validate-boolean";
+import { notAllowed, unexpectedTypeOf, valid } from "./failure";
 
 import {
   boolean,
   booleanSchema,
-  BooleanSchema,
   onlyFalse,
   onlyTrue,
 } from "../schema/boolean-schema";
 
-function testValidateBoolean(
-  deepEqual: DeepEqualAssertion,
-  schema: BooleanSchema,
-  value: unknown,
-  failureTypes: BooleanFailureType[]
-) {
-  deepEqual(
-    validateBoolean(schema, value).map((t) => t.type),
-    failureTypes
-  );
-}
-
 test("boolean-validate boolean", (t) => {
-  testValidateBoolean(t.deepEqual, boolean, true, []);
-  testValidateBoolean(t.deepEqual, boolean, false, []);
-  testValidateBoolean(t.deepEqual, boolean, null, ["unexpected-null"]);
-  testValidateBoolean(t.deepEqual, boolean, undefined, [
-    "unexpected-undefined",
-  ]);
-  testValidateBoolean(t.deepEqual, boolean, [true], ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, boolean, {}, ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, boolean, "hello", ["expected-boolean"]);
+  const { allow } = boolean.properties;
+  t.deepEqual(validateBoolean(boolean, true), valid);
+  t.deepEqual(validateBoolean(boolean, false), valid);
+  t.deepEqual(validateBoolean(boolean, null), notAllowed(allow, null));
+  t.deepEqual(
+    validateBoolean(boolean, undefined),
+    notAllowed(allow, undefined)
+  );
+  t.deepEqual(
+    validateBoolean(boolean, [true]),
+    unexpectedTypeOf("boolean", [true])
+  );
+  t.deepEqual(validateBoolean(boolean, {}), unexpectedTypeOf("boolean", {}));
+  t.deepEqual(
+    validateBoolean(boolean, "hello"),
+    unexpectedTypeOf("boolean", "hello")
+  );
 });
 
 test("boolean-validate onlyTrue", (t) => {
-  testValidateBoolean(t.deepEqual, onlyTrue, true, []);
-  testValidateBoolean(t.deepEqual, onlyTrue, false, ["not-allowed"]);
-  testValidateBoolean(t.deepEqual, onlyTrue, null, ["unexpected-null"]);
-  testValidateBoolean(t.deepEqual, onlyTrue, undefined, [
-    "unexpected-undefined",
-  ]);
-  testValidateBoolean(t.deepEqual, onlyTrue, [true], ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, onlyTrue, {}, ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, onlyTrue, "hello", ["expected-boolean"]);
+  const { allow } = onlyTrue.properties;
+  t.deepEqual(validateBoolean(onlyTrue, true), valid);
+  t.deepEqual(validateBoolean(onlyTrue, false), notAllowed(allow, false));
+  t.deepEqual(validateBoolean(onlyTrue, null), notAllowed(allow, null));
+  t.deepEqual(
+    validateBoolean(onlyTrue, undefined),
+    notAllowed(allow, undefined)
+  );
+  t.deepEqual(
+    validateBoolean(onlyTrue, [true]),
+    unexpectedTypeOf("boolean", [true])
+  );
+  t.deepEqual(validateBoolean(onlyTrue, {}), unexpectedTypeOf("boolean", {}));
+  t.deepEqual(
+    validateBoolean(onlyTrue, "hello"),
+    unexpectedTypeOf("boolean", "hello")
+  );
 });
 
 test("boolean-validate onlyFalse", (t) => {
-  testValidateBoolean(t.deepEqual, onlyFalse, true, ["not-allowed"]);
-  testValidateBoolean(t.deepEqual, onlyFalse, false, []);
-  testValidateBoolean(t.deepEqual, onlyFalse, null, ["unexpected-null"]);
-  testValidateBoolean(t.deepEqual, onlyFalse, undefined, [
-    "unexpected-undefined",
-  ]);
-  testValidateBoolean(t.deepEqual, onlyFalse, [true], ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, onlyFalse, {}, ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, onlyFalse, "hello", ["expected-boolean"]);
+  const { allow } = onlyFalse.properties;
+  t.deepEqual(validateBoolean(onlyFalse, true), notAllowed(allow, true));
+  t.deepEqual(validateBoolean(onlyFalse, false), valid);
+  t.deepEqual(validateBoolean(onlyFalse, null), notAllowed(allow, null));
+  t.deepEqual(
+    validateBoolean(onlyFalse, undefined),
+    notAllowed(allow, undefined)
+  );
+  t.deepEqual(
+    validateBoolean(onlyFalse, [true]),
+    unexpectedTypeOf("boolean", [true])
+  );
+  t.deepEqual(validateBoolean(onlyFalse, {}), unexpectedTypeOf("boolean", {}));
+  t.deepEqual(
+    validateBoolean(onlyFalse, "hello"),
+    unexpectedTypeOf("boolean", "hello")
+  );
 });
 
 test("boolean-validate boolean with null", (t) => {
   const schema = booleanSchema({ allow: [true, false, null] });
-  testValidateBoolean(t.deepEqual, schema, true, []);
-  testValidateBoolean(t.deepEqual, schema, false, []);
-  testValidateBoolean(t.deepEqual, schema, null, []);
-  testValidateBoolean(t.deepEqual, schema, undefined, ["unexpected-undefined"]);
-  testValidateBoolean(t.deepEqual, schema, [true], ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, schema, {}, ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, schema, "hello", ["expected-boolean"]);
+  const { allow } = schema.properties;
+  t.deepEqual(validateBoolean(schema, true), valid);
+  t.deepEqual(validateBoolean(schema, false), valid);
+  t.deepEqual(validateBoolean(schema, null), valid);
+  t.deepEqual(validateBoolean(schema, undefined), notAllowed(allow, undefined));
+  t.deepEqual(
+    validateBoolean(schema, [true]),
+    unexpectedTypeOf("boolean", [true])
+  );
+  t.deepEqual(validateBoolean(schema, {}), unexpectedTypeOf("boolean", {}));
+  t.deepEqual(
+    validateBoolean(schema, "hello"),
+    unexpectedTypeOf("boolean", "hello")
+  );
 });
 
 test("boolean-validate boolean with undefined", (t) => {
   const schema = booleanSchema({
     allow: [true, false, undefined],
   });
-  testValidateBoolean(t.deepEqual, schema, true, []);
-  testValidateBoolean(t.deepEqual, schema, false, []);
-  testValidateBoolean(t.deepEqual, schema, null, ["unexpected-null"]);
-  testValidateBoolean(t.deepEqual, schema, undefined, []);
-  testValidateBoolean(t.deepEqual, schema, [true], ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, schema, {}, ["expected-boolean"]);
-  testValidateBoolean(t.deepEqual, schema, "hello", ["expected-boolean"]);
+  const { allow } = schema.properties;
+  t.deepEqual(validateBoolean(schema, true), valid);
+  t.deepEqual(validateBoolean(schema, false), valid);
+  t.deepEqual(validateBoolean(schema, null), notAllowed(allow, null));
+  t.deepEqual(validateBoolean(schema, undefined), valid);
+  t.deepEqual(
+    validateBoolean(schema, [true]),
+    unexpectedTypeOf("boolean", [true])
+  );
+  t.deepEqual(validateBoolean(schema, {}), unexpectedTypeOf("boolean", {}));
+  t.deepEqual(
+    validateBoolean(schema, "hello"),
+    unexpectedTypeOf("boolean", "hello")
+  );
 });

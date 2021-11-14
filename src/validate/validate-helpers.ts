@@ -1,19 +1,26 @@
-import { Failure, noFailures, oneFailure } from "../lib/failure";
+import {
+  Failure,
+  multipleFailures,
+  MultipleFailures,
+  notAllowed,
+  Valid,
+  valid,
+} from "./failure";
 
-export function checkForNullOrUndefined<T, FailureType extends string>(
-  allow: Array<T | null | undefined>,
-  value: unknown,
-  callback: () => Failure<FailureType>[]
-): Failure<FailureType | "unexpected-null" | "unexpected-undefined">[] {
-  if (value === null) {
-    if (allow.includes(null)) return noFailures();
-    return oneFailure("unexpected-null", `Expected number, got null`);
-  }
-
-  if (value === undefined) {
-    if (allow.includes(undefined)) return noFailures();
-    return oneFailure("unexpected-undefined", `Expected number, got undefined`);
-  }
-
-  return callback();
+export function allowIncludes(allow: unknown[], value: unknown) {
+  return allow.includes(value) ? valid : notAllowed(allow, value);
 }
+
+export const collectFailures = <Failures extends Array<Failure<string>>>(
+  ...failures: Failures
+):
+  | Failures[number]
+  | Valid
+  | MultipleFailures<Exclude<Failures[number], Valid>> => {
+  const actualFailures = failures.filter((f) => f.failureType !== "Valid");
+
+  if (actualFailures.length === 0) return valid;
+  if (actualFailures.length === 1) return actualFailures[0];
+
+  return multipleFailures(...failures);
+};
