@@ -11,7 +11,7 @@ export interface NumberProperties {
 
 export const defaultNumberProperties: NumberProperties = {
   mustBeInteger: false,
-  allow: [[-Infinity, "< n <", Infinity], undefined, null],
+  allow: [[-Infinity, "< n <", Infinity]],
 };
 
 export function numberSchema(
