@@ -32,3 +32,4 @@ export const negativeInteger = numberSchema({
   allow: [negativeRange],
   mustBeInteger: true,
 })
+export const anyNumber = numberSchema({ allow: [[-Infinity, '<= n <=', Infinity], NaN] })

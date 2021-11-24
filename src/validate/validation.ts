@@ -31,9 +31,9 @@ export interface MultipleFailures<Failures extends Validation<string>> extends V
   failures: Failures[]
 }
 
-export const multipleFailures = <Failures extends Validation<string>>(
-  ...failures: Failures[]
-): MultipleFailures<Failures> => ({
+export const multipleFailures = <Failures extends Array<Validation<string>>>(
+  ...failures: Failures
+): MultipleFailures<Failures[number]> => ({
   validationType: 'MultipleFailures',
   failures,
 })
