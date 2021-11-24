@@ -1,9 +1,13 @@
 import { BooleanSchema } from './boolean-schema'
 import { NumberSchema } from './number-schema'
 
-export interface Schema {
+export interface SchemaDefinition<S extends Schema> {
   version: 'v1'
-  definition: SchemaDefinition
+  schema: S
 }
 
-export type SchemaDefinition = NumberSchema | BooleanSchema
+export type Schema = NumberSchema | BooleanSchema
+
+export function schemaDefinition<S extends Schema>(schema: S): SchemaDefinition<S> {
+  return { version: 'v1', schema }
+}

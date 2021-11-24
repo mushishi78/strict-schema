@@ -12,7 +12,7 @@ import {
   anyNumber,
 } from '../schema/number-schema'
 
-test('number-validate number', (t) => {
+test('validateNumber number', (t) => {
   const { allow } = number.properties
   t.deepEqual(validateNumber(number, 0), valid)
   t.deepEqual(validateNumber(number, 1), valid)
@@ -28,7 +28,7 @@ test('number-validate number', (t) => {
   t.deepEqual(validateNumber(number, 'hello'), unexpectedTypeOf('number', 'hello'))
 })
 
-test('number-validate integer', (t) => {
+test('validateNumber integer', (t) => {
   const { allow } = integer.properties
   t.deepEqual(validateNumber(integer, 0), valid)
   t.deepEqual(validateNumber(integer, 1), valid)
@@ -47,7 +47,7 @@ test('number-validate integer', (t) => {
   t.deepEqual(validateNumber(integer, 'hello'), unexpectedTypeOf('number', 'hello'))
 })
 
-test('number-validate positiveNumber', (t) => {
+test('validateNumber positiveNumber', (t) => {
   const { allow } = positiveNumber.properties
   t.deepEqual(validateNumber(positiveNumber, 0), valid)
   t.deepEqual(validateNumber(positiveNumber, 1), valid)
@@ -63,7 +63,7 @@ test('number-validate positiveNumber', (t) => {
   t.deepEqual(validateNumber(positiveNumber, 'hello'), unexpectedTypeOf('number', 'hello'))
 })
 
-test('number-validate positiveInteger', (t) => {
+test('validateNumber positiveInteger', (t) => {
   const { allow } = positiveInteger.properties
   t.deepEqual(validateNumber(positiveInteger, 0), valid)
   t.deepEqual(validateNumber(positiveInteger, 1), valid)
@@ -85,7 +85,7 @@ test('number-validate positiveInteger', (t) => {
   t.deepEqual(validateNumber(positiveInteger, 'hello'), unexpectedTypeOf('number', 'hello'))
 })
 
-test('number-validate negativeNumber', (t) => {
+test('validateNumber negativeNumber', (t) => {
   const { allow } = negativeNumber.properties
   t.deepEqual(validateNumber(negativeNumber, 0), valid)
   t.deepEqual(validateNumber(negativeNumber, 1), notAllowed(allow, 1))
@@ -101,7 +101,7 @@ test('number-validate negativeNumber', (t) => {
   t.deepEqual(validateNumber(negativeNumber, 'hello'), unexpectedTypeOf('number', 'hello'))
 })
 
-test('number-validate negativeInteger', (t) => {
+test('validateNumber negativeInteger', (t) => {
   const { allow } = negativeInteger.properties
   t.deepEqual(validateNumber(negativeInteger, 0), valid)
   t.deepEqual(validateNumber(negativeInteger, 1), notAllowed(allow, 1))
@@ -120,7 +120,7 @@ test('number-validate negativeInteger', (t) => {
   t.deepEqual(validateNumber(negativeInteger, 'hello'), unexpectedTypeOf('number', 'hello'))
 })
 
-test('number-validate anyNumber', (t) => {
+test('validateNumber anyNumber', (t) => {
   const { allow } = anyNumber.properties
   t.deepEqual(validateNumber(anyNumber, 0), valid)
   t.deepEqual(validateNumber(anyNumber, 1), valid)

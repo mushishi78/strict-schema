@@ -3,6 +3,10 @@ import { SchemaType } from './schema-type'
 
 export interface NumberSchema extends SchemaType<'NumberSchema', NumberProperties> {}
 
+export function isNumberSchema(schema: SchemaType<string, {}>): schema is NumberSchema {
+  return schema.schemaType === 'NumberSchema'
+}
+
 export interface NumberProperties {
   mustBeInteger: boolean
   allow: Array<number | NumberRange | undefined | null>

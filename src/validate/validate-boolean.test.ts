@@ -3,7 +3,7 @@ import { validateBoolean } from './validate-boolean'
 import { notAllowed, unexpectedTypeOf, valid } from './validation'
 import { boolean, booleanSchema, onlyFalse, onlyTrue } from '../schema/boolean-schema'
 
-test('boolean-validate boolean', (t) => {
+test('validateBoolean boolean', (t) => {
   const { allow } = boolean.properties
   t.deepEqual(validateBoolean(boolean, true), valid)
   t.deepEqual(validateBoolean(boolean, false), valid)
@@ -14,7 +14,7 @@ test('boolean-validate boolean', (t) => {
   t.deepEqual(validateBoolean(boolean, 'hello'), unexpectedTypeOf('boolean', 'hello'))
 })
 
-test('boolean-validate onlyTrue', (t) => {
+test('validateBoolean onlyTrue', (t) => {
   const { allow } = onlyTrue.properties
   t.deepEqual(validateBoolean(onlyTrue, true), valid)
   t.deepEqual(validateBoolean(onlyTrue, false), notAllowed(allow, false))
@@ -25,7 +25,7 @@ test('boolean-validate onlyTrue', (t) => {
   t.deepEqual(validateBoolean(onlyTrue, 'hello'), unexpectedTypeOf('boolean', 'hello'))
 })
 
-test('boolean-validate onlyFalse', (t) => {
+test('validateBoolean onlyFalse', (t) => {
   const { allow } = onlyFalse.properties
   t.deepEqual(validateBoolean(onlyFalse, true), notAllowed(allow, true))
   t.deepEqual(validateBoolean(onlyFalse, false), valid)
@@ -36,7 +36,7 @@ test('boolean-validate onlyFalse', (t) => {
   t.deepEqual(validateBoolean(onlyFalse, 'hello'), unexpectedTypeOf('boolean', 'hello'))
 })
 
-test('boolean-validate boolean with null', (t) => {
+test('validateBoolean boolean with null', (t) => {
   const schema = booleanSchema({ allow: [true, false, null] })
   const { allow } = schema.properties
   t.deepEqual(validateBoolean(schema, true), valid)
@@ -48,7 +48,7 @@ test('boolean-validate boolean with null', (t) => {
   t.deepEqual(validateBoolean(schema, 'hello'), unexpectedTypeOf('boolean', 'hello'))
 })
 
-test('boolean-validate boolean with undefined', (t) => {
+test('validateBoolean boolean with undefined', (t) => {
   const schema = booleanSchema({
     allow: [true, false, undefined],
   })

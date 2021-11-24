@@ -12,6 +12,8 @@ export const expectedInteger = (value: number): ExpectedInteger => ({
   value,
 })
 
+export type NumberValidation = ReturnType<typeof validateNumber>
+
 export function validateNumber(schema: NumberSchema, value: unknown) {
   const { allow, mustBeInteger } = schema.properties
 
