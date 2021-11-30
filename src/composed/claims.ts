@@ -18,7 +18,7 @@ export type Claim =
   | OrClaim<any>
   | NotClaim<any>
 
-type ContantTypes = string | number | boolean | null | undefined | object | Array<any>
+export type ContantTypes = string | number | boolean | null | undefined | object | Array<any>
 export type ConstantClaim<T extends ContantTypes> = { constant: T }
 export const constant = <T extends ContantTypes>(constant: T): ConstantClaim<T> => ({ constant })
 export const isConstantClaim = (claim: unknown): claim is ConstantClaim<ContantTypes> =>
