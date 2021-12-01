@@ -1,8 +1,8 @@
 import test from 'ava'
-import { constant, integer, numberRange } from './claims'
-import { validateConstant, validateInteger, validateNumberRange } from './validate'
+import { constant, integer, numberRange, stringRange } from './claims'
+import { validateConstant, validateInteger, validateNumberRange, validateStringRange } from './validate'
 
-import { valid, notConstant, unexpectedTypeOf, notInNumberRange, notInteger } from './validation'
+import { valid, notConstant, unexpectedTypeOf, notInNumberRange, notInteger, notInStringRange } from './validation'
 
 test('validateConstant valid', (t) => {
   t.deepEqual(validateConstant(constant(null), null), valid)
@@ -79,4 +79,20 @@ test('validateInteger notInteger', (t) => {
   t.deepEqual(validateInteger(integer, 0.000001), notInteger(0.000001))
   t.deepEqual(validateInteger(integer, 0 / 0), notInteger(0 / 0))
   t.deepEqual(validateInteger(integer, Infinity), notInteger(Infinity))
+})
+
+test('validateStringRange valid', (t) => {
+  t.deepEqual(validateStringRange(stringRange([0, 5]), ''), valid)
+  t.deepEqual(validateStringRange(stringRange([0, 5]), 'Heya'), valid)
+  t.deepEqual(validateStringRange(stringRange([0, 5]), 'Hello'), valid)
+})
+
+test('validateStringRange unexpectedTypeOf', (t) => {
+  t.deepEqual(validateStringRange(stringRange([0, 5]), 0), unexpectedTypeOf('string', 0))
+  t.deepEqual(validateStringRange(stringRange([0, 5]), true), unexpectedTypeOf('string', true))
+})
+
+test('validateStringRange notInStringRange', (t) => {
+  t.deepEqual(validateStringRange(stringRange([1, 4]), ''), notInStringRange([1, 4], ''))
+  t.deepEqual(validateStringRange(stringRange([1, 4]), 'Hello'), notInStringRange([1, 4], 'Hello'))
 })

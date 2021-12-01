@@ -1,4 +1,5 @@
 import { NumberRange } from '../lib/number-range'
+import { StringRange } from '../lib/string-range'
 import { ContantTypes } from './claims'
 
 export interface Valid {
@@ -52,3 +53,15 @@ export interface NotInteger {
 }
 
 export const notInteger = (value: number): NotInteger => ({ validationType: 'NotInteger', value })
+
+export interface NotInStringRange {
+  validationType: 'NotInStringRange'
+  stringRange: StringRange
+  value: string
+}
+
+export const notInStringRange = (stringRange: StringRange, value: string): NotInStringRange => ({
+  validationType: 'NotInStringRange',
+  stringRange,
+  value,
+})
