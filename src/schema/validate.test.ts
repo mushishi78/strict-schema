@@ -1,6 +1,13 @@
 import test from 'ava'
-import { constant, integer, numberRange, stringRange } from './claims'
-import { validateConstant, validateInteger, validateNumberRange, validateStringRange } from './validate'
+import { boolean, constant, integer, numberRange, stringRange } from './claims'
+
+import {
+  validateBoolean,
+  validateConstant,
+  validateInteger,
+  validateNumberRange,
+  validateStringRange,
+} from './validate'
 
 import { valid, notConstant, unexpectedTypeOf, notInNumberRange, notInteger, notInStringRange } from './validation'
 
@@ -47,6 +54,8 @@ test('validateNumberRange valid', (t) => {
 test('validateNumberRange unexpectedTypeOf', (t) => {
   t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), 'hello'), unexpectedTypeOf('number', 'hello'))
   t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), '0'), unexpectedTypeOf('number', '0'))
+  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), null), unexpectedTypeOf('number', null))
+  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), undefined), unexpectedTypeOf('number', undefined))
 })
 
 test('validateNumberRange notInNumberRange', (t) => {
@@ -73,6 +82,8 @@ test('validateInteger valid', (t) => {
 test('validateInteger unexpectedTypeOf', (t) => {
   t.deepEqual(validateInteger(integer, 'hello'), unexpectedTypeOf('number', 'hello'))
   t.deepEqual(validateInteger(integer, '0'), unexpectedTypeOf('number', '0'))
+  t.deepEqual(validateInteger(integer, null), unexpectedTypeOf('number', null))
+  t.deepEqual(validateInteger(integer, undefined), unexpectedTypeOf('number', undefined))
 })
 
 test('validateInteger notInteger', (t) => {
@@ -90,9 +101,23 @@ test('validateStringRange valid', (t) => {
 test('validateStringRange unexpectedTypeOf', (t) => {
   t.deepEqual(validateStringRange(stringRange([0, 5]), 0), unexpectedTypeOf('string', 0))
   t.deepEqual(validateStringRange(stringRange([0, 5]), true), unexpectedTypeOf('string', true))
+  t.deepEqual(validateStringRange(stringRange([0, 5]), null), unexpectedTypeOf('string', null))
+  t.deepEqual(validateStringRange(stringRange([0, 5]), undefined), unexpectedTypeOf('string', undefined))
 })
 
 test('validateStringRange notInStringRange', (t) => {
   t.deepEqual(validateStringRange(stringRange([1, 4]), ''), notInStringRange([1, 4], ''))
   t.deepEqual(validateStringRange(stringRange([1, 4]), 'Hello'), notInStringRange([1, 4], 'Hello'))
+})
+
+test('validateBoolean valid', (t) => {
+  t.deepEqual(validateBoolean(boolean, true), valid)
+  t.deepEqual(validateBoolean(boolean, false), valid)
+})
+
+test('validateBoolean unexpectedTypeOf', (t) => {
+  t.deepEqual(validateBoolean(boolean, 0), unexpectedTypeOf('boolean', 0))
+  t.deepEqual(validateBoolean(boolean, 'true'), unexpectedTypeOf('boolean', 'true'))
+  t.deepEqual(validateBoolean(boolean, null), unexpectedTypeOf('boolean', null))
+  t.deepEqual(validateBoolean(boolean, undefined), unexpectedTypeOf('boolean', undefined))
 })

@@ -1,5 +1,5 @@
 import { isInNumberRange } from '../lib/number-range'
-import { ContantTypes, ConstantClaim, NumberRangeClaim, IntegerClaim, StringRangeClaim } from './claims'
+import { ContantTypes, ConstantClaim, NumberRangeClaim, IntegerClaim, StringRangeClaim, BooleanClaim } from './claims'
 import { valid, notConstant, unexpectedTypeOf, notInNumberRange, notInteger, notInStringRange } from './validation'
 
 export function validateConstant<Constant extends ContantTypes>({ constant }: ConstantClaim<Constant>, value: unknown) {
@@ -20,4 +20,8 @@ export function validateStringRange(claim: StringRangeClaim, value: unknown) {
   if (typeof value !== 'string') return unexpectedTypeOf('string', value)
   const [min, max] = claim.stringRange
   return min <= value.length && max >= value.length ? valid : notInStringRange(claim.stringRange, value)
+}
+
+export function validateBoolean(_: BooleanClaim, value: unknown) {
+  return typeof value === 'boolean' ? valid : unexpectedTypeOf('boolean', value)
 }
