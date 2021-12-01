@@ -1,16 +1,17 @@
-import { ContantTypes, ConstantClaim } from './claims'
-
-export const valid = Symbol('valid')
-export type Valid = typeof valid
-
-export type NotConstant<Constant extends ContantTypes> = { type: 'NotConstant'; constant: Constant; value: unknown }
-export const notConstant = <Constant extends ContantTypes>(
-  constant: Constant,
-  value: unknown
-): NotConstant<Constant> => ({ type: 'NotConstant', constant, value })
+import { isInNumberRange } from '../lib/number-range'
+import { ContantTypes, ConstantClaim, NumberRangeClaim, IntegerClaim } from './claims'
+import { valid, notConstant, unexpectedTypeOf, notInNumberRange, notInteger } from './validation'
 
 export function validateConstant<Constant extends ContantTypes>({ constant }: ConstantClaim<Constant>, value: unknown) {
-  if (value === constant) return valid
-  if (Number.isNaN(constant) && Number.isNaN(value)) return valid
-  return notConstant(constant, value)
+  return Object.is(value, constant) ? valid : notConstant(constant, value)
+}
+
+export function validateNumberRange(claim: NumberRangeClaim, value: unknown) {
+  if (typeof value !== 'number') return unexpectedTypeOf('number', value)
+  return isInNumberRange(claim.numberRange, value) ? valid : notInNumberRange(claim.numberRange, value)
+}
+
+export function validateInteger(_: IntegerClaim, value: unknown) {
+  if (typeof value !== 'number') return unexpectedTypeOf('number', value)
+  return Number.isInteger(value) ? valid : notInteger(value)
 }
