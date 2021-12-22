@@ -2,6 +2,16 @@ import { NumberRange } from '../lib/number-range'
 import { StringRange } from '../lib/string-range'
 import { ContantTypes } from './claims'
 
+export type Validation = Valid | Failure
+
+export type Failure =
+  | NotConstant<any>
+  | UnexpectedTypeOf
+  | NotInNumberRange
+  | NotInteger
+  | NotInStringRange
+  | IndexedFailures<any>
+
 export interface Valid {
   validationType: 'Valid'
 }
@@ -64,4 +74,28 @@ export const notInStringRange = (stringRange: StringRange, value: string): NotIn
   validationType: 'NotInStringRange',
   stringRange,
   value,
+})
+
+export interface FailureAtIndex<F extends Failure> {
+  index: number
+  failure: F
+}
+
+type _GetFailureFromIndexPair<P> = P extends FailureAtIndex<infer F> ? F : never
+
+export const failureAtIndex = <F extends Failure>(index: number, failure: F): FailureAtIndex<F> => ({
+  index,
+  failure,
+})
+
+export interface IndexedFailures<F extends Failure> {
+  validationType: 'IndexedFailures'
+  failures: Array<FailureAtIndex<F>>
+}
+
+export const indexedFailures = <Failures extends FailureAtIndex<any>[]>(
+  failures: Failures
+): IndexedFailures<_GetFailureFromIndexPair<Failures[number]>> => ({
+  validationType: 'IndexedFailures',
+  failures,
 })

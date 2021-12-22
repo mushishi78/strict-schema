@@ -2,6 +2,7 @@
     "name": "strict-schema",
     "private": true,
     "scripts": {
+        "clean": "find ./dist -not -name 'package.json' -delete",
         "prettier": "npx prettier -w src/"
     },
     "devDependencies": {
