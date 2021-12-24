@@ -11,9 +11,11 @@ import {
   fields,
   instanceOf,
   integer,
+  label,
   not,
   numberRange,
   or,
+  recurse,
   stringRange,
   tuple,
 } from './claims'
@@ -117,6 +119,19 @@ type FileBrand = { readonly __brand: unique symbol }
       chew: number | boolean
       lick?: null
     }
+  }
+  assert<Equals<Actual, Expected>>()
+}
+
+{
+  const claim = label('node', (nodeRef) =>
+    fields(
+      field('child?', recurse(nodeRef))
+    ))
+
+  type Actual = ValueOfClaim<typeof claim>
+  type Expected = {
+    child?: Expected
   }
   assert<Equals<Actual, Expected>>()
 }

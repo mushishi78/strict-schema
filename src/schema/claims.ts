@@ -17,6 +17,8 @@ export type Claim =
   | AndClaim<any>
   | OrClaim<any>
   | NotClaim<any>
+  | LabelClaim<any>
+  | RecurseClaim<any>
 
 export type ContantTypes = string | number | boolean | null | undefined | object | Array<any>
 export type ConstantClaim<T extends ContantTypes> = { constant: T }
@@ -77,13 +79,25 @@ export type AndCombiniations =
   | _Combinations<[BrandClaim<any>, Exclude<Claim, BrandClaim<any>>]>
 
 export type AndClaim<Cs extends AndCombiniations> = { and: Cs }
-export const and = <Cs extends AndCombiniations>(...and: Cs) => ({ and })
+export const and = <Cs extends AndCombiniations>(...and: Cs): AndClaim<Cs> => ({ and })
 export const isAndClaim = (claim: unknown): claim is AndClaim<any> => isObject(claim) && 'and' in claim
 
 export type OrClaim<Cs extends Claim[]> = { or: Cs }
-export const or = <Cs extends Claim[]>(...or: Cs) => ({ or })
+export const or = <Cs extends Claim[]>(...or: Cs): OrClaim<Cs> => ({ or })
 export const isOrClaim = (claim: unknown): claim is OrClaim<any> => isObject(claim) && 'or' in claim
 
 export type NotClaim<C extends Claim> = { not: C }
-export const not = <C extends Claim>(not: C) => ({ not })
+export const not = <C extends Claim>(not: C): NotClaim<C> => ({ not })
 export const isNotClaim = (claim: unknown): claim is NotClaim<any> => isObject(claim) && 'not' in claim
+
+export type LabelName = string
+export type LabelRef<C extends Claim> = { labelRef: LabelName }
+
+export type LabelClaim<C extends Claim> = { label: LabelName, claim: (ref: LabelRef<C>) => C }
+export const label = <C extends Claim>(label: LabelName, claim: (ref: LabelRef<C>) => C): LabelClaim<C> => ({ label, claim })
+export const isLabelClaim = (claim: unknown): claim is LabelClaim<any> => isObject(claim) && 'label' in claim
+
+export type RecurseClaim<C extends Claim> = { recurse: LabelName }
+export const recurse = <C extends Claim>(ref: LabelRef<C>): RecurseClaim<C> => ({ recurse: ref.labelRef })
+export const isRecurseClaim = (claim: unknown): claim is RecurseClaim<any> => isObject(claim) && 'recurse' in claim
+
