@@ -2,6 +2,7 @@ import { isObject } from 'remeda'
 import { NumberRange } from '../lib/number-range'
 import { StringRange } from '../lib/string-range'
 import { _Combinations } from '../lib/type-helpers'
+import { FindRecurseInClaim } from './FindRecurseInClaim'
 
 export type Claim =
   | ConstantClaim<any>
@@ -17,7 +18,7 @@ export type Claim =
   | AndClaim<any>
   | OrClaim<any>
   | NotClaim<any>
-  | LabelClaim<any>
+  | LabelClaim<any, any>
   | RecurseClaim<any>
 
 export type ContantTypes = string | number | boolean | null | undefined | object | Array<any>
@@ -90,14 +91,11 @@ export type NotClaim<C extends Claim> = { not: C }
 export const not = <C extends Claim>(not: C): NotClaim<C> => ({ not })
 export const isNotClaim = (claim: unknown): claim is NotClaim<any> => isObject(claim) && 'not' in claim
 
-export type LabelName = string
-export type LabelRef<C extends Claim> = { labelRef: LabelName }
+export type LabelClaim<L extends string, C extends Claim> = { label: L, claim: C }
+export const label = <L extends FindRecurseInClaim<C>, C extends Claim>(label: L, claim: C): LabelClaim<L, C> => ({ label, claim })
+export const isLabelClaim = (claim: unknown): claim is LabelClaim<any, any> => isObject(claim) && 'label' in claim
 
-export type LabelClaim<C extends Claim> = { label: LabelName, claim: (ref: LabelRef<C>) => C }
-export const label = <C extends Claim>(label: LabelName, claim: (ref: LabelRef<C>) => C): LabelClaim<C> => ({ label, claim })
-export const isLabelClaim = (claim: unknown): claim is LabelClaim<any> => isObject(claim) && 'label' in claim
-
-export type RecurseClaim<C extends Claim> = { recurse: LabelName }
-export const recurse = <C extends Claim>(ref: LabelRef<C>): RecurseClaim<C> => ({ recurse: ref.labelRef })
+export type RecurseClaim<L extends string> = { recurse: L }
+export const recurse = <L extends string>(recurse: L): RecurseClaim<L> => ({ recurse })
 export const isRecurseClaim = (claim: unknown): claim is RecurseClaim<any> => isObject(claim) && 'recurse' in claim
 

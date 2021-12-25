@@ -1,4 +1,5 @@
 import { Unite } from 'tsafe/tools/Unite'
+import { ReplaceRecurseInClaim } from './ReplaceRecurseInClaim'
 
 import {
     Claim,
@@ -34,8 +35,8 @@ export type ValueOfClaim<C extends Claim> =
     C extends AndClaim<infer Cs> ? ValueOfIntersection<Cs> :
     C extends OrClaim<infer Cs> ? ValueOfClaim<Cs[number]> :
     C extends NotClaim<infer C> ? ValueOfClaim<C> :
-    C extends LabelClaim<infer C> ? ValueOfClaim<C> :
-    C extends RecurseClaim<infer C> ? ValueOfClaim<C> :
+    C extends LabelClaim<infer L, infer CR> ? ReplaceRecurseInClaim<CR, L, CR> :
+    C extends RecurseClaim<infer C> ? never :
     never
 
 // prettier-ignore

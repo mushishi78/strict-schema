@@ -124,10 +124,9 @@ type FileBrand = { readonly __brand: unique symbol }
 }
 
 {
-  const claim = label('node', (nodeRef) =>
-    fields(
-      field('child?', recurse(nodeRef))
-    ))
+  const claim = label('node', fields(
+    field('child?', recurse('node'))
+  ))
 
   type Actual = ValueOfClaim<typeof claim>
   type Expected = {
