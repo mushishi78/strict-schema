@@ -1,5 +1,4 @@
 import { Unite } from 'tsafe/tools/Unite'
-import { ReplaceRecurseInClaim } from './ReplaceRecurseInClaim'
 
 import {
     Claim,
@@ -16,48 +15,66 @@ import {
     AndClaim,
     OrClaim,
     NotClaim,
-    LabelClaim,
-    RecurseClaim,
+    IndexedReference,
+    IndexedClaim,
+    Field,
+    FieldReference,
 } from './claims'
 
+type References = Record<string, any>
+
 // prettier-ignore
-export type ValueOfClaim<C extends Claim> =
+export type ValueOfClaim<C extends Claim, Refs extends References> =
     C extends ConstantClaim<infer Constant> ? Constant :
     C extends NumberRangeClaim ? number :
     C extends IntegerClaim ? number :
     C extends StringRangeClaim ? string :
     C extends BooleanClaim ? boolean :
-    C extends ArrayClaim<infer C2> ? ValueOfClaim<C2>[] :
-    C extends TupleClaim<infer Cs> ? ValueOfTuple<Cs> :
-    C extends FieldsClaim<infer Fields> ? Unite<ValueOfFields<Fields>> :
+    C extends ArrayClaim<infer C2> ? Array<ValueOfIndexedClaim<C2, Refs>> :
+    C extends TupleClaim<infer Cs> ? ValueOfTuple<Cs, Refs> :
+    C extends FieldsClaim<infer Fields> ? Unite<ValueOfFields<Fields, Refs>> :
     C extends BrandClaim<infer Brand> ? Brand :
     C extends InstanceOfClaim<infer Constructor> ? InstanceType<Constructor> :
-    C extends AndClaim<infer Cs> ? ValueOfIntersection<Cs> :
-    C extends OrClaim<infer Cs> ? ValueOfClaim<Cs[number]> :
-    C extends NotClaim<infer C> ? ValueOfClaim<C> :
-    C extends LabelClaim<infer L, infer CR> ? ReplaceRecurseInClaim<CR, L, CR> :
-    C extends RecurseClaim<infer C> ? never :
-    never
+    C extends AndClaim<infer Cs> ? ValueOfIntersection<Cs, Refs> :
+    C extends OrClaim<infer Cs> ? ValueOfClaim<Cs[number], Refs> :
+    C extends NotClaim<infer C> ? ValueOfClaim<C, Refs> :
+    { error: ['ValueOfClaim', 'Unrecognized claim', C] }
+
+type ValueOfIndexedClaim<C extends IndexedClaim, Refs extends References> =
+    C extends IndexedReference<infer Reference> ? Refs[Reference] :
+    C extends Claim ? ValueOfClaim<C, Refs> :
+    { error: ['ValueOfIndexedClaim', 'Unrecognized claim', C] }
 
 // prettier-ignore
-type ValueOfTuple<Cs extends Claim[]> =
+type ValueOfTuple<Cs extends IndexedClaim[], Refs extends References> =
+    Cs extends [infer C1, ...infer Cs] ? C1 extends IndexedClaim ? Cs extends IndexedClaim[] ?
+    [ValueOfIndexedClaim<C1, Refs>, ...ValueOfTuple<Cs, Refs>] : [] : [] : []
+
+// prettier-ignore
+type ValueOfFields<Fields extends Field[], Refs extends References> =
+    Fields extends [infer F, ...infer Fs] ? F extends Field ? Fs extends Field[] ?
+    ValueOfField<F, Refs> & ValueOfFields<Fs, Refs> : {} : {} : {}
+
+// prettier-ignore
+type ValueOfField<F extends Field, Refs extends References> =
+    F extends FieldReference<infer Key, `${infer Ref}`> ? Refs[Ref] :
+
+    F extends [`${infer Key}?`, infer C2] ? C2 extends Claim
+    ? { [k in Key]?: ValueOfClaim<C2, Refs> }
+    : { error: ['ValueOfField', 'Unrecognized value in field', C2] } :
+
+    F extends [`${infer Key}`, infer C2] ? C2 extends Claim
+    ? { [k in Key]: ValueOfClaim<C2, Refs> }
+    : { error: ['ValueOfField', 'Unrecognized value in field', C2] } :
+
+    { error: ['ValueOfField', 'Unrecognized field', F] }
+
+// prettier-ignore
+type ValueOfIntersection<Cs extends Claim[], Refs extends References> =
     Cs extends [infer C1, ...infer Cs] ? C1 extends Claim ? Cs extends Claim[] ?
-    [ValueOfClaim<C1>, ...ValueOfTuple<Cs>] : [] : [] : []
+    ValueOfClaim<C1, Refs> & ValueOfIntersection<Cs, Refs> : {} : {} : {}
 
-// prettier-ignore
-type ValueOfFields<Fields extends [string, Claim][]> =
-    Fields extends [infer Field, ...infer FieldsRest] ? Field extends [string, Claim] ? FieldsRest extends [string, Claim][] ?
-    ValueOfField<Field> & ValueOfFields<FieldsRest> : {} : {} : {}
 
-// prettier-ignore
-type ValueOfField<Field extends [string, Claim]> =
-    Field extends [`${infer Key}?`, infer C2] ? C2 extends Claim ?
-    { [k in Key]?: ValueOfClaim<C2> } : {}
 
-    : Field extends [infer Key, infer C2] ? Key extends string ? C2 extends Claim ?
-    { [k in Key]: ValueOfClaim<C2> } : {} : {} : {}
 
-// prettier-ignore
-type ValueOfIntersection<Cs extends Claim[]> =
-    Cs extends [infer C1, ...infer Cs] ? C1 extends Claim ? Cs extends Claim[] ?
-    ValueOfClaim<C1> & ValueOfIntersection<Cs> : {} : {} : {}
+

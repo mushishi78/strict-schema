@@ -2,7 +2,6 @@ import { isObject } from 'remeda'
 import { NumberRange } from '../lib/number-range'
 import { StringRange } from '../lib/string-range'
 import { _Combinations } from '../lib/type-helpers'
-import { FindRecurseInClaim } from './FindRecurseInClaim'
 
 export type Claim =
   | ConstantClaim<any>
@@ -18,8 +17,10 @@ export type Claim =
   | AndClaim<any>
   | OrClaim<any>
   | NotClaim<any>
-  | LabelClaim<any, any>
-  | RecurseClaim<any>
+
+export type IndexedClaim =
+  | Claim
+  | IndexedReference<any>
 
 export type ContantTypes = string | number | boolean | null | undefined | object | Array<any>
 export type ConstantClaim<T extends ContantTypes> = { constant: T }
@@ -45,18 +46,26 @@ export type BooleanClaim = 'Boolean'
 export const boolean: BooleanClaim = 'Boolean'
 export const isBooleanClaim = (claim: unknown): claim is BooleanClaim => claim === 'Boolean'
 
-export type ArrayClaim<C extends Claim> = { array: C }
-export const array = <C extends Claim>(claim: C): ArrayClaim<C> => ({ array: claim })
+export type ArrayClaim<C extends IndexedClaim> = { array: C }
+export const array = <C extends IndexedClaim>(claim: C): ArrayClaim<C> => ({ array: claim })
 export const isArrayClaim = (claim: unknown): claim is ArrayClaim<any> => isObject(claim) && 'array' in claim
 
-export type TupleClaim<Cs extends Claim[]> = { tuple: Cs }
-export const tuple = <Cs extends Claim[]>(...claims: Cs): TupleClaim<Cs> => ({ tuple: claims })
+export type TupleClaim<Cs extends IndexedClaim[]> = { tuple: Cs }
+export const tuple = <Cs extends IndexedClaim[]>(...claims: Cs): TupleClaim<Cs> => ({ tuple: claims })
 export const isTupleClaim = (claim: unknown): claim is TupleClaim<any> => isObject(claim) && 'tuple' in claim
 
-export type FieldsClaim<Fs extends [string, Claim][]> = { fields: Fs; exclusive: boolean }
+export type IndexedReference<R extends string> = { indexedReference: R }
+export const indexedReference = <R extends string>(indexedReference: R): IndexedReference<R> => ({ indexedReference })
+export const isIndexedReference = (obj: unknown): obj is IndexedReference<any> => isObject(obj) && 'indexedReference' in obj
+
+export type Field = [string, Claim] | FieldReference<string, string>
+export type FieldReference<K extends string, R extends string> = { fieldReference: [K, R] }
+export const fieldReference = <K extends string, R extends string>(key: K, ref: R): FieldReference<K, R> => ({ fieldReference: [key, ref] })
+
+export type FieldsClaim<Fs extends Field[]> = { fields: Fs; exclusive: boolean }
 export const field = <K extends string, C extends Claim>(key: K, claim: C): [K, C] => [key, claim]
-export const fields = <Fs extends [string, Claim][]>(...fields: Fs): FieldsClaim<Fs> => ({ fields, exclusive: false })
-export const exclusiveFields = <Fs extends [[string, Claim]]>(...fields: Fs): FieldsClaim<Fs> => ({
+export const fields = <Fs extends Field[]>(...fields: Fs): FieldsClaim<Fs> => ({ fields, exclusive: false })
+export const exclusiveFields = <Fs extends Field[]>(...fields: Fs): FieldsClaim<Fs> => ({
   fields,
   exclusive: true,
 })
@@ -90,12 +99,3 @@ export const isOrClaim = (claim: unknown): claim is OrClaim<any> => isObject(cla
 export type NotClaim<C extends Claim> = { not: C }
 export const not = <C extends Claim>(not: C): NotClaim<C> => ({ not })
 export const isNotClaim = (claim: unknown): claim is NotClaim<any> => isObject(claim) && 'not' in claim
-
-export type LabelClaim<L extends string, C extends Claim> = { label: L, claim: C }
-export const label = <L extends FindRecurseInClaim<C>, C extends Claim>(label: L, claim: C): LabelClaim<L, C> => ({ label, claim })
-export const isLabelClaim = (claim: unknown): claim is LabelClaim<any, any> => isObject(claim) && 'label' in claim
-
-export type RecurseClaim<L extends string> = { recurse: L }
-export const recurse = <L extends string>(recurse: L): RecurseClaim<L> => ({ recurse })
-export const isRecurseClaim = (claim: unknown): claim is RecurseClaim<any> => isObject(claim) && 'recurse' in claim
-

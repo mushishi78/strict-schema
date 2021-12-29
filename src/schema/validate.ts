@@ -15,6 +15,9 @@ import {
   isBooleanClaim,
   isArrayClaim,
   isStringRangeClaim,
+  IndexedClaim,
+  isIndexedReference,
+  IndexedReference,
 } from './claims'
 
 import {
@@ -47,11 +50,15 @@ export type ClaimValidation<C extends Claim> =
   [C] extends [BooleanClaim] ? BooleanValidation :
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim> : never
 
-type _ClaimValidation<C extends Claim> = [ClaimValidation<C>] extends [infer V]
-  ? V extends Validation
-    ? V
-    : never
-  : never
+export type IndexedClaimValidation<C extends IndexedClaim> =
+  [C] extends [IndexedReference<infer Ref>] ? { error: ['IndexedClaimValidation', 'Not implemented', C] } :
+  [C] extends [Claim] ? ClaimValidation<C> :
+  { error: ['IndexedClaimValidation', 'unrecognized claim', C] }
+
+// prettier-ignore
+type _ClaimValidation<C extends Claim> =
+  [ClaimValidation<C>] extends [infer V] ? V extends Validation ?
+  V : never : never
 
 type _JustFailures<V extends Validation> = Exclude<V, Valid>
 
@@ -61,10 +68,14 @@ export type IntegerValidation = Valid | UnexpectedTypeOf | NotInteger
 export type StringRangeValidation = Valid | UnexpectedTypeOf | NotInStringRange
 export type BooleanValidation = Valid | UnexpectedTypeOf
 
-export type ArrayValidation<C extends Claim> =
+export type ArrayValidation<C extends IndexedClaim> =
   | Valid
   | UnexpectedTypeOf
-  | IndexedFailures<_JustFailures<_ClaimValidation<C>>>
+  | (
+    C extends Claim ? IndexedFailures<_JustFailures<_ClaimValidation<C>>> :
+    C extends IndexedReference<infer Ref> ? { error: ['ArrayValidation', 'Not implemented', C] } :
+    never
+  )
 
 export function validateClaim<C extends Claim>(claim: C, value: unknown): ClaimValidation<C> {
   if (isConstantClaim(claim)) return validateConstant(claim, value) as ClaimValidation<C>
@@ -74,6 +85,11 @@ export function validateClaim<C extends Claim>(claim: C, value: unknown): ClaimV
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C>
   if (isArrayClaim(claim)) return validateArray(claim, value) as ClaimValidation<C>
   throw new Error(`Unrecognied claim: ${claim}`)
+}
+
+function validateIndexedClaim<C extends IndexedClaim>(claim: C, value: unknown): IndexedClaimValidation<C> {
+  if (isIndexedReference(claim)) throw new Error('Not implemented')
+  return validateClaim(claim, value)
 }
 
 export function validateConstant<Constant extends ContantTypes>(
@@ -103,18 +119,19 @@ export function validateBoolean(_: BooleanClaim, value: unknown): BooleanValidat
   return typeof value === 'boolean' ? valid : unexpectedTypeOf('boolean', value)
 }
 
-export function validateArray<NC extends Claim>(claim: ArrayClaim<NC>, value: unknown): ArrayValidation<NC> {
+export function validateArray<NC extends IndexedClaim>(claim: ArrayClaim<NC>, value: unknown): ArrayValidation<NC> {
   if (!Array.isArray(value)) return unexpectedTypeOf('array', value)
 
-  type V = ClaimValidation<NC>
-  type F = V extends Failure ? F : never
+  type V = IndexedClaimValidation<NC>
+  type F = V extends Failure ? V : never
   const failures: Array<FailureAtIndex<F>> = []
 
   for (let i = 0; i < value.length; i++) {
-    const result: V = validateClaim(claim.array, value[i])
+    const result: V = validateIndexedClaim(claim.array, value[i])
+    if ('error' in result) continue
     if (result.validationType === 'Valid') continue
     failures.push(failureAtIndex(i, result as F))
   }
 
-  return failures.length === 0 ? valid : indexedFailures(failures)
+  return failures.length === 0 ? valid : indexedFailures(failures) as ArrayValidation<NC>
 }
