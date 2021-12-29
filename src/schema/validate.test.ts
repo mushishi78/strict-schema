@@ -1,5 +1,5 @@
 import test from 'ava'
-import { array, boolean, constant, integer, numberRange, stringRange } from './claims'
+import { array, boolean, constant, indexedReference, integer, numberRange, stringRange } from './claims'
 
 import {
   validateArray,
@@ -133,33 +133,40 @@ test('validateBoolean unexpectedTypeOf', (t) => {
 })
 
 test('validateArray valid', (t) => {
-  t.deepEqual(validateArray(array(integer), [1, 2, 34, 56, 1, 2]), valid)
+  t.deepEqual(validateArray(array(integer), [1, 2, 34, 56, 1, 2], {}), valid)
   t.deepEqual(
     validateArray(array(array(integer)), [
       [1, 2],
       [34, 56, 1, 2],
-    ]),
+    ], {}),
     valid
   )
-  t.deepEqual(validateArray(array(constant(0)), [0, 0, 0, 0]), valid)
-  t.deepEqual(validateArray(array(boolean), [true, true, false]), valid)
+  t.deepEqual(validateArray(array(constant(0)), [0, 0, 0, 0], {}), valid)
+  t.deepEqual(validateArray(array(boolean), [true, true, false], {}), valid)
 })
 
 test('validateArray unexpectedTypeOf', (t) => {
-  t.deepEqual(validateArray(array(integer), 0), unexpectedTypeOf('array', 0))
-  t.deepEqual(validateArray(array(integer), 'true'), unexpectedTypeOf('array', 'true'))
-  t.deepEqual(validateArray(array(integer), null), unexpectedTypeOf('array', null))
-  t.deepEqual(validateArray(array(integer), undefined), unexpectedTypeOf('array', undefined))
+  t.deepEqual(validateArray(array(integer), 0, {}), unexpectedTypeOf('array', 0))
+  t.deepEqual(validateArray(array(integer), 'true', {}), unexpectedTypeOf('array', 'true'))
+  t.deepEqual(validateArray(array(integer), null, {}), unexpectedTypeOf('array', null))
+  t.deepEqual(validateArray(array(integer), undefined, {}), unexpectedTypeOf('array', undefined))
 })
 
 test('validateArray indexedFailures', (t) => {
-  t.deepEqual(validateArray(array(integer), [1, 2, 34.67, 56]), indexedFailures([failureAtIndex(2, notInteger(34.67))]))
+  t.deepEqual(validateArray(array(integer), [1, 2, 34.67, 56], {}), indexedFailures([failureAtIndex(2, notInteger(34.67))]))
   t.deepEqual(
-    validateArray(array(integer), [1, '2', 34.67, 56]),
+    validateArray(array(integer), [1, '2', 34.67, 56], {}),
     indexedFailures([failureAtIndex(1, unexpectedTypeOf('number', '2')), failureAtIndex(2, notInteger(34.67))])
   )
   t.deepEqual(
-    validateArray(array(array(integer)), [[1, 4], ['2']]),
+    validateArray(array(array(integer)), [[1, 4], ['2']], {}),
     indexedFailures([failureAtIndex(1, indexedFailures([failureAtIndex(0, unexpectedTypeOf('number', '2'))]))])
   )
+})
+
+test('validateArray indexedReference', (t) => {
+  t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34, 56, 1, 2], { num: integer }), valid)
+  t.deepEqual(validateArray(array(indexedReference('num')), 0, { num: integer }), unexpectedTypeOf('array', 0))
+  t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34.67, 56], { num: integer }), indexedFailures([failureAtIndex(2, notInteger(34.67))]))
+  t.throws(() => validateArray(array(indexedReference('missing')), [1, 2, 34, 56, 1, 2], {}))
 })

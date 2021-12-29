@@ -41,26 +41,31 @@ import {
   Validation,
 } from './validation'
 
+type ReferenceLookup = Record<string, Claim>
+
 // prettier-ignore
-export type ClaimValidation<C extends Claim> =
+export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [ConstantClaim<infer Const>] ? ConstantValidation<Const> :
   [C] extends [NumberRangeClaim] ? NumberRangeValidation :
   [C] extends [IntegerClaim] ? IntegerValidation :
   [C] extends [StringRangeClaim] ? StringRangeValidation :
   [C] extends [BooleanClaim] ? BooleanValidation :
-  [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim> : never
+  [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
+  { error: ['ClaimValidation', 'unrecognized claim', C] }
 
-export type IndexedClaimValidation<C extends IndexedClaim> =
-  [C] extends [IndexedReference<infer Ref>] ? { error: ['IndexedClaimValidation', 'Not implemented', C] } :
-  [C] extends [Claim] ? ClaimValidation<C> :
-  { error: ['IndexedClaimValidation', 'unrecognized claim', C] }
+export type IndexedClaimValidation<C extends IndexedClaim, RL extends ReferenceLookup> = ClaimValidation<_ClaimForIndexedClaim<C, RL>, RL>
 
 // prettier-ignore
-type _ClaimValidation<C extends Claim> =
-  [ClaimValidation<C>] extends [infer V] ? V extends Validation ?
+type _ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
+  [ClaimValidation<C, RL>] extends [infer V] ? V extends Validation ?
   V : never : never
 
 type _JustFailures<V extends Validation> = Exclude<V, Valid>
+
+type _ClaimForIndexedClaim<C extends IndexedClaim, RL extends ReferenceLookup> =
+  [C] extends [IndexedReference<infer Ref>] ? RL[Ref] :
+  [C] extends [Claim] ? C :
+  never
 
 export type ConstantValidation<Constant extends ContantTypes> = Valid | NotConstant<Constant>
 export type NumberRangeValidation = Valid | UnexpectedTypeOf | NotInNumberRange
@@ -68,28 +73,34 @@ export type IntegerValidation = Valid | UnexpectedTypeOf | NotInteger
 export type StringRangeValidation = Valid | UnexpectedTypeOf | NotInStringRange
 export type BooleanValidation = Valid | UnexpectedTypeOf
 
-export type ArrayValidation<C extends IndexedClaim> =
+export type ArrayValidation<C extends IndexedClaim, RL extends ReferenceLookup> =
   | Valid
   | UnexpectedTypeOf
-  | (
-    C extends Claim ? IndexedFailures<_JustFailures<_ClaimValidation<C>>> :
-    C extends IndexedReference<infer Ref> ? { error: ['ArrayValidation', 'Not implemented', C] } :
-    never
-  )
+  | IndexedFailures<_JustFailures<_ClaimValidation<_ClaimForIndexedClaim<C, RL>, RL>>>
 
-export function validateClaim<C extends Claim>(claim: C, value: unknown): ClaimValidation<C> {
-  if (isConstantClaim(claim)) return validateConstant(claim, value) as ClaimValidation<C>
-  if (isNumberRangeClaim(claim)) return validateNumberRange(claim, value) as ClaimValidation<C>
-  if (isIntegerClaim(claim)) return validateInteger(claim, value) as ClaimValidation<C>
-  if (isStringRangeClaim(claim)) return validateStringRange(claim, value) as ClaimValidation<C>
-  if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C>
-  if (isArrayClaim(claim)) return validateArray(claim, value) as ClaimValidation<C>
+export function validateClaim<C extends Claim, RL extends ReferenceLookup>(claim: C, value: unknown, referenceLookup: RL): ClaimValidation<C, RL> {
+  if (isConstantClaim(claim)) return validateConstant(claim, value) as ClaimValidation<C, RL>
+  if (isNumberRangeClaim(claim)) return validateNumberRange(claim, value) as ClaimValidation<C, RL>
+  if (isIntegerClaim(claim)) return validateInteger(claim, value) as ClaimValidation<C, RL>
+  if (isStringRangeClaim(claim)) return validateStringRange(claim, value) as ClaimValidation<C, RL>
+  if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
+  if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
   throw new Error(`Unrecognied claim: ${claim}`)
 }
 
-function validateIndexedClaim<C extends IndexedClaim>(claim: C, value: unknown): IndexedClaimValidation<C> {
-  if (isIndexedReference(claim)) throw new Error('Not implemented')
-  return validateClaim(claim, value)
+function lookupReference<RL extends ReferenceLookup, K extends keyof RL>(referenceLookup: RL, key: K): RL[K] {
+  const claim = referenceLookup[key]
+  if (claim != null) return claim
+  throw new Error(`Missing reference lookup: ${key} in ${referenceLookup}`)
+}
+
+function validateIndexedClaim<C extends IndexedClaim, RL extends ReferenceLookup>(claim: C, value: unknown, referenceLookup: RL): IndexedClaimValidation<C, RL> {
+  const claimToUse =
+    isIndexedReference(claim)
+      ? lookupReference(referenceLookup, claim.indexedReference) as _ClaimForIndexedClaim<C, RL>
+      : claim as _ClaimForIndexedClaim<C, RL>
+
+  return validateClaim(claimToUse, value, referenceLookup)
 }
 
 export function validateConstant<Constant extends ContantTypes>(
@@ -119,19 +130,19 @@ export function validateBoolean(_: BooleanClaim, value: unknown): BooleanValidat
   return typeof value === 'boolean' ? valid : unexpectedTypeOf('boolean', value)
 }
 
-export function validateArray<NC extends IndexedClaim>(claim: ArrayClaim<NC>, value: unknown): ArrayValidation<NC> {
+export function validateArray<NC extends IndexedClaim, RL extends ReferenceLookup>(claim: ArrayClaim<NC>, value: unknown, referenceLookup: RL): ArrayValidation<NC, RL> {
   if (!Array.isArray(value)) return unexpectedTypeOf('array', value)
 
-  type V = IndexedClaimValidation<NC>
+  type V = IndexedClaimValidation<NC, RL>
   type F = V extends Failure ? V : never
   const failures: Array<FailureAtIndex<F>> = []
 
   for (let i = 0; i < value.length; i++) {
-    const result: V = validateIndexedClaim(claim.array, value[i])
+    const result: V = validateIndexedClaim(claim.array, value[i], referenceLookup)
     if ('error' in result) continue
     if (result.validationType === 'Valid') continue
     failures.push(failureAtIndex(i, result as F))
   }
 
-  return failures.length === 0 ? valid : indexedFailures(failures) as ArrayValidation<NC>
+  return failures.length === 0 ? valid : indexedFailures(failures) as ArrayValidation<NC, RL>
 }
