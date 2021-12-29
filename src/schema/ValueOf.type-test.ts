@@ -19,7 +19,6 @@ import {
   tuple,
   fieldReference,
 } from './claims'
-import { Unite } from 'tsafe/tools/Unite'
 
 type FileBrand = { readonly __brand: unique symbol }
 
@@ -140,7 +139,7 @@ type FileBrand = { readonly __brand: unique symbol }
 {
   const claim = fields(
     field('relations', fields(
-      fieldReference('child', 'child'),
+      fieldReference('child?', 'child'),
       field('count', integer))))
 
   interface IActual { child?: Actual }
@@ -157,8 +156,8 @@ type FileBrand = { readonly __brand: unique symbol }
   const claim = or(
     fields(
       field('type', or(constant('+'), constant('-'))),
-      fieldReference('left', 'left'),
-      fieldReference('right', 'right')),
+      fieldReference('left?', 'left'),
+      fieldReference('right?', 'right')),
     fields(
       field('type', constant('num'))))
 

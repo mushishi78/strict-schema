@@ -1,4 +1,5 @@
 import { Unite } from 'tsafe/tools/Unite'
+import { ReferenceLookup } from './FindReferencesInClaim'
 
 import {
     Claim,
@@ -23,8 +24,11 @@ import {
 
 type References = Record<string, any>
 
+
 // prettier-ignore
-export type ValueOfClaim<C extends Claim, Refs extends References> =
+export type ValueOfClaim<C extends Claim, Refs extends ReferenceLookup<C>> = _ValueOfClaim<C, Refs>
+
+type _ValueOfClaim<C extends Claim, Refs extends References> =
     C extends ConstantClaim<infer Constant> ? Constant :
     C extends NumberRangeClaim ? number :
     C extends IntegerClaim ? number :
@@ -36,13 +40,13 @@ export type ValueOfClaim<C extends Claim, Refs extends References> =
     C extends BrandClaim<infer Brand> ? Brand :
     C extends InstanceOfClaim<infer Constructor> ? InstanceType<Constructor> :
     C extends AndClaim<infer Cs> ? ValueOfIntersection<Cs, Refs> :
-    C extends OrClaim<infer Cs> ? ValueOfClaim<Cs[number], Refs> :
-    C extends NotClaim<infer C> ? ValueOfClaim<C, Refs> :
+    C extends OrClaim<infer Cs> ? _ValueOfClaim<Cs[number], Refs> :
+    C extends NotClaim<infer C> ? _ValueOfClaim<C, Refs> :
     { error: ['ValueOfClaim', 'Unrecognized claim', C] }
 
 type ValueOfIndexedClaim<C extends IndexedClaim, Refs extends References> =
     C extends IndexedReference<infer Reference> ? Refs[Reference] :
-    C extends Claim ? ValueOfClaim<C, Refs> :
+    C extends Claim ? _ValueOfClaim<C, Refs> :
     { error: ['ValueOfIndexedClaim', 'Unrecognized claim', C] }
 
 // prettier-ignore
@@ -60,11 +64,11 @@ type ValueOfField<F extends Field, Refs extends References> =
     F extends FieldReference<infer Key, `${infer Ref}`> ? Refs[Ref] :
 
     F extends [`${infer Key}?`, infer C2] ? C2 extends Claim
-    ? { [k in Key]?: ValueOfClaim<C2, Refs> }
+    ? { [k in Key]?: _ValueOfClaim<C2, Refs> }
     : { error: ['ValueOfField', 'Unrecognized value in field', C2] } :
 
     F extends [`${infer Key}`, infer C2] ? C2 extends Claim
-    ? { [k in Key]: ValueOfClaim<C2, Refs> }
+    ? { [k in Key]: _ValueOfClaim<C2, Refs> }
     : { error: ['ValueOfField', 'Unrecognized value in field', C2] } :
 
     { error: ['ValueOfField', 'Unrecognized field', F] }
@@ -72,7 +76,7 @@ type ValueOfField<F extends Field, Refs extends References> =
 // prettier-ignore
 type ValueOfIntersection<Cs extends Claim[], Refs extends References> =
     Cs extends [infer C1, ...infer Cs] ? C1 extends Claim ? Cs extends Claim[] ?
-    ValueOfClaim<C1, Refs> & ValueOfIntersection<Cs, Refs> : {} : {} : {}
+    _ValueOfClaim<C1, Refs> & ValueOfIntersection<Cs, Refs> : {} : {} : {}
 
 
 
