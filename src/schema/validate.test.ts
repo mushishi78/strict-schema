@@ -1,5 +1,5 @@
 import test from 'ava'
-import { array, boolean, constant, indexedReference, integer, numberRange, stringRange } from './claims'
+import { array, boolean, constant, indexedReference, integer, numberRange, stringRange, tuple } from './claims'
 
 import {
   validateArray,
@@ -8,6 +8,7 @@ import {
   validateInteger,
   validateNumberRange,
   validateStringRange,
+  validateTuple,
 } from './validate'
 
 import {
@@ -19,6 +20,7 @@ import {
   notInStringRange,
   indexedFailures,
   failureAtIndex,
+  unexpectedLength,
 } from './validation'
 
 test('validateConstant valid', (t) => {
@@ -169,4 +171,44 @@ test('validateArray indexedReference', (t) => {
   t.deepEqual(validateArray(array(indexedReference('num')), 0, { num: integer }), unexpectedTypeOf('array', 0))
   t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34.67, 56], { num: integer }), indexedFailures([failureAtIndex(2, notInteger(34.67))]))
   t.throws(() => validateArray(array(indexedReference('missing')), [1, 2, 34, 56, 1, 2], {}))
+})
+
+test('validateTuple valid', (t) => {
+  t.deepEqual(validateTuple(tuple(integer), [1], {}), valid)
+  t.deepEqual(validateTuple(tuple(integer, boolean), [1, false], {}), valid)
+  t.deepEqual(validateTuple(tuple(tuple(integer, boolean)), [[1, true]], {}), valid)
+  t.deepEqual(validateTuple(tuple(constant(0), boolean), [0, false], {}), valid)
+  t.deepEqual(validateTuple(tuple(integer, boolean, constant(null)), [25, false, null], {}), valid)
+})
+
+test('validateTuple unexpectedTypeOf', (t) => {
+  t.deepEqual(validateTuple(tuple(integer), 0, {}), unexpectedTypeOf('array', 0))
+  t.deepEqual(validateTuple(tuple(integer), 'true', {}), unexpectedTypeOf('array', 'true'))
+  t.deepEqual(validateTuple(tuple(integer), null, {}), unexpectedTypeOf('array', null))
+  t.deepEqual(validateTuple(tuple(integer), undefined, {}), unexpectedTypeOf('array', undefined))
+})
+
+test('validateTuple unexpectedLength', (t) => {
+  t.deepEqual(validateTuple(tuple(integer), [], {}), unexpectedLength(1, []))
+  t.deepEqual(validateTuple(tuple(integer), [1, 2], {}), unexpectedLength(1, [1, 2]))
+  t.deepEqual(validateTuple(tuple(integer, boolean, integer), [1, false], {}), unexpectedLength(3, [1, false]))
+  t.deepEqual(validateTuple(tuple(tuple(integer)), [[0], [1]], {}), unexpectedLength(1, [[0], [1]]))
+})
+
+test('validateTuple indexedFailures', (t) => {
+  t.deepEqual(validateTuple(tuple(integer), [0.23], {}), indexedFailures([failureAtIndex(0, notInteger(0.23))]))
+  t.deepEqual(
+    validateTuple(tuple(integer, boolean, integer), [1, 1, 1], {}),
+    indexedFailures([failureAtIndex(1, unexpectedTypeOf('boolean', 1))])
+  )
+  t.deepEqual(
+    validateTuple(tuple(tuple(integer), tuple(boolean)), [[1], ['2']], {}),
+    indexedFailures([failureAtIndex(1, indexedFailures([failureAtIndex(0, unexpectedTypeOf('boolean', '2'))]))])
+  )
+})
+
+test('validateTuple indexedReference', (t) => {
+  t.deepEqual(validateTuple(tuple(indexedReference('num')), [1], { num: integer }), valid)
+  t.deepEqual(validateTuple(tuple(boolean, indexedReference('num')), [true, 0.23], { num: integer }), indexedFailures([failureAtIndex(1, notInteger(0.23))]))
+  t.throws(() => validateTuple(tuple(indexedReference('missing')), [1], {}))
 })

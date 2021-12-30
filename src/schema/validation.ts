@@ -99,3 +99,15 @@ export const indexedFailures = <Failures extends FailureAtIndex<any>[]>(
   validationType: 'IndexedFailures',
   failures,
 })
+
+export interface UnexpectedLength {
+  validationType: 'UnexpectedLength'
+  length: number
+  value: unknown[]
+}
+
+export const unexpectedLength = (length: number, value: unknown[]): UnexpectedLength => ({
+  validationType: 'UnexpectedLength',
+  length,
+  value,
+})

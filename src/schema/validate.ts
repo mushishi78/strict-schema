@@ -18,6 +18,8 @@ import {
   IndexedClaim,
   isIndexedReference,
   IndexedReference,
+  TupleClaim,
+  isTupleClaim,
 } from './claims'
 
 import {
@@ -39,6 +41,8 @@ import {
   Failure,
   FailureAtIndex,
   Validation,
+  UnexpectedLength,
+  unexpectedLength,
 } from './validation'
 
 type ReferenceLookup = Record<string, Claim>
@@ -51,6 +55,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [StringRangeClaim] ? StringRangeValidation :
   [C] extends [BooleanClaim] ? BooleanValidation :
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
+  [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
   { error: ['ClaimValidation', 'unrecognized claim', C] }
 
 export type IndexedClaimValidation<C extends IndexedClaim, RL extends ReferenceLookup> = ClaimValidation<_ClaimForIndexedClaim<C, RL>, RL>
@@ -78,6 +83,17 @@ export type ArrayValidation<C extends IndexedClaim, RL extends ReferenceLookup> 
   | UnexpectedTypeOf
   | IndexedFailures<_JustFailures<_ClaimValidation<_ClaimForIndexedClaim<C, RL>, RL>>>
 
+export type TupleValidation<Cs extends IndexedClaim[], RL extends ReferenceLookup> =
+  | Valid
+  | UnexpectedTypeOf
+  | UnexpectedLength
+  | IndexedFailures<_JustFailures<_ValidationForTupleClaims<Cs, RL>[number]>>
+
+type _ValidationForTupleClaims<Cs extends IndexedClaim[], RL extends ReferenceLookup> =
+  Cs extends [infer C, ...infer Rest] ? C extends IndexedClaim ? Rest extends IndexedClaim[] ?
+  [_ClaimValidation<_ClaimForIndexedClaim<C, RL>, RL>, ..._ValidationForTupleClaims<Rest, RL>] :
+  [] : [] : []
+
 export function validateClaim<C extends Claim, RL extends ReferenceLookup>(claim: C, value: unknown, referenceLookup: RL): ClaimValidation<C, RL> {
   if (isConstantClaim(claim)) return validateConstant(claim, value) as ClaimValidation<C, RL>
   if (isNumberRangeClaim(claim)) return validateNumberRange(claim, value) as ClaimValidation<C, RL>
@@ -85,6 +101,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(claim
   if (isStringRangeClaim(claim)) return validateStringRange(claim, value) as ClaimValidation<C, RL>
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
   if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
+  if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
   throw new Error(`Unrecognied claim: ${claim}`)
 }
 
@@ -145,4 +162,23 @@ export function validateArray<NC extends IndexedClaim, RL extends ReferenceLooku
   }
 
   return failures.length === 0 ? valid : indexedFailures(failures) as ArrayValidation<NC, RL>
+}
+
+export function validateTuple<NCs extends IndexedClaim[], RL extends ReferenceLookup>(claim: TupleClaim<NCs>, values: unknown, referenceLookup: RL): TupleValidation<NCs, RL> {
+  if (!Array.isArray(values)) return unexpectedTypeOf('array', values)
+  if (values.length !== claim.tuple.length) return unexpectedLength(claim.tuple.length, values)
+
+  type V = _ValidationForTupleClaims<NCs, RL>[number]
+  type F = _JustFailures<V>
+  const failures: Array<FailureAtIndex<F>> = []
+
+  for (let i = 0; i < values.length; i++) {
+    const nestedClaim: NCs[typeof i] = claim.tuple[i]
+    const result = validateIndexedClaim(nestedClaim, values[i], referenceLookup)
+    if ('error' in result) continue
+    if (result.validationType === 'Valid') continue
+    failures.push(failureAtIndex(i, result as F))
+  }
+
+  return failures.length === 0 ? valid : indexedFailures(failures) as TupleValidation<NCs, RL>
 }

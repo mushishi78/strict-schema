@@ -1,6 +1,6 @@
 import { assert, Equals } from 'tsafe'
 import { ClaimValidation } from './validate'
-import { array, boolean, constant, indexedReference, integer, numberRange, stringRange } from './claims'
+import { array, boolean, constant, indexedReference, integer, numberRange, stringRange, tuple } from './claims'
 
 import {
   Valid,
@@ -10,6 +10,7 @@ import {
   UnexpectedTypeOf,
   NotInStringRange,
   IndexedFailures,
+  UnexpectedLength,
 } from './validation'
 
 {
@@ -61,5 +62,39 @@ import {
   const claim = array(indexedReference('num'))
   type Actual = ClaimValidation<typeof claim, { num: 'Integer' }>
   type Expected = Valid | UnexpectedTypeOf | IndexedFailures<UnexpectedTypeOf | NotInteger>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = tuple(constant(256))
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = Valid | UnexpectedTypeOf | UnexpectedLength | IndexedFailures<NotConstant<256>>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = tuple(constant(256), integer)
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = Valid | UnexpectedTypeOf | UnexpectedLength | IndexedFailures<NotConstant<256> | UnexpectedTypeOf | NotInteger>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = tuple(tuple(integer))
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected =
+    | Valid
+    | UnexpectedTypeOf
+    | UnexpectedLength
+    | IndexedFailures<UnexpectedTypeOf | IndexedFailures<UnexpectedTypeOf | NotInteger>>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = tuple(indexedReference('num'))
+  type Actual = ClaimValidation<typeof claim, { num: 'Integer' }>
+  type Expected = Valid | UnexpectedTypeOf | UnexpectedLength | IndexedFailures<UnexpectedTypeOf | NotInteger>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = tuple(constant(0), indexedReference('num'))
+  type Actual = ClaimValidation<typeof claim, { num: 'Integer' }>
+  type Expected = Valid | UnexpectedTypeOf | UnexpectedLength | IndexedFailures<UnexpectedTypeOf | NotInteger | NotConstant<0>>
   assert<Equals<Actual, Expected>>()
 }
