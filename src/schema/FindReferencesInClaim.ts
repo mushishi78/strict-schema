@@ -1,3 +1,4 @@
+import { TypeError } from '../lib/type-helpers'
 import {
     Claim,
     ConstantClaim,
@@ -44,12 +45,12 @@ export type FindReferencesInClaim<C extends Claim> =
     [C] extends [AndClaim<infer Cs>] ? FindReferencesInTuple<Cs> :
     [C] extends [OrClaim<infer Cs>] ? FindReferencesInTuple<Cs> :
     [C] extends [NotClaim<infer C>] ? FindReferencesInClaim<C> :
-    [{ error: ['FindReferencesInClaim', 'Unrecognized claim', C] }]
+    [TypeError<['FindReferencesInClaim', 'Unrecognized claim', C]>]
 
 type FindReferencesInIndexedClaim<C extends IndexedClaim> =
     C extends IndexedReference<string> ? [C] :
     C extends Claim ? FindReferencesInClaim<C> :
-    [{ error: ['FindReferencesInIndexedClaim', 'Unrecognized claim or reference', C] }]
+    [TypeError<['FindReferencesInIndexedClaim', 'Unrecognized claim or reference', C]>]
 
 // prettier-ignore
 type FindReferencesInFields<Fields extends Field[]> =
@@ -60,7 +61,7 @@ type FindReferencesInFields<Fields extends Field[]> =
 type FindReferencesInField<F extends Field> =
     F extends FieldReference<string, string> ? [F] :
     F extends [infer K, infer C] ? C extends Claim ? FindReferencesInClaim<C> : [] :
-    [{ error: ['FindReferencesInFields', 'unrecognized field', F] }]
+    [TypeError<['FindReferencesInFields', 'unrecognized field', F]>]
 
 // prettier-ignore
 type FindReferencesInTuple<Cs extends IndexedClaim[]> =

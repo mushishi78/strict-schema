@@ -1,5 +1,6 @@
 import { Unite } from 'tsafe/tools/Unite'
 import { ReferenceLookup } from './FindReferencesInClaim'
+import { TypeError } from '../lib/type-helpers'
 
 import {
     Claim,
@@ -42,12 +43,12 @@ type _ValueOfClaim<C extends Claim, Refs extends References> =
     C extends AndClaim<infer Cs> ? ValueOfIntersection<Cs, Refs> :
     C extends OrClaim<infer Cs> ? _ValueOfClaim<Cs[number], Refs> :
     C extends NotClaim<infer C> ? _ValueOfClaim<C, Refs> :
-    { error: ['ValueOfClaim', 'Unrecognized claim', C] }
+    TypeError<['ValueOfClaim', 'Unrecognized claim', C]>
 
 type ValueOfIndexedClaim<C extends IndexedClaim, Refs extends References> =
     C extends IndexedReference<infer Reference> ? Refs[Reference] :
     C extends Claim ? _ValueOfClaim<C, Refs> :
-    { error: ['ValueOfIndexedClaim', 'Unrecognized claim', C] }
+    TypeError<['ValueOfIndexedClaim', 'Unrecognized claim', C]>
 
 // prettier-ignore
 type ValueOfTuple<Cs extends IndexedClaim[], Refs extends References> =
@@ -65,13 +66,13 @@ type ValueOfField<F extends Field, Refs extends References> =
 
     F extends [`${infer Key}?`, infer C2] ? C2 extends Claim
     ? { [k in Key]?: _ValueOfClaim<C2, Refs> }
-    : { error: ['ValueOfField', 'Unrecognized value in field', C2] } :
+    : TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
 
     F extends [`${infer Key}`, infer C2] ? C2 extends Claim
     ? { [k in Key]: _ValueOfClaim<C2, Refs> }
-    : { error: ['ValueOfField', 'Unrecognized value in field', C2] } :
+    : TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
 
-    { error: ['ValueOfField', 'Unrecognized field', F] }
+    TypeError<['ValueOfField', 'Unrecognized field', F]>
 
 // prettier-ignore
 type ValueOfIntersection<Cs extends Claim[], Refs extends References> =

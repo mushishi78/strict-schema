@@ -15,3 +15,6 @@ export type _Combinations<List extends any[], Count extends any[] = List> =
       | [..._Combinations<Ls, Cs>, L1]
     : never
   : never
+
+
+export type TypeError<Error extends any[]> = { error: Error }

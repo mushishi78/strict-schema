@@ -10,13 +10,15 @@ export type Failure =
   | NotInNumberRange
   | NotInteger
   | NotInStringRange
-  | IndexedFailures<any>
+  | IndexedValidations<any>
+  | UnexpectedLength
 
 export interface Valid {
   validationType: 'Valid'
 }
 
 export const valid: Valid = { validationType: 'Valid' }
+export const isValid = (validation: Validation): validation is Valid => validation.validationType === 'Valid'
 
 export interface NotConstant<Constant extends ContantTypes> {
   validationType: 'NotConstant'
@@ -76,28 +78,14 @@ export const notInStringRange = (stringRange: StringRange, value: string): NotIn
   value,
 })
 
-export interface FailureAtIndex<F extends Failure> {
-  index: number
-  failure: F
+export interface IndexedValidations<Vs extends Validation[]> {
+  validationType: 'IndexedValidations'
+  validations: Vs
 }
 
-type _GetFailureFromIndexPair<P> = P extends FailureAtIndex<infer F> ? F : never
-
-export const failureAtIndex = <F extends Failure>(index: number, failure: F): FailureAtIndex<F> => ({
-  index,
-  failure,
-})
-
-export interface IndexedFailures<F extends Failure> {
-  validationType: 'IndexedFailures'
-  failures: Array<FailureAtIndex<F>>
-}
-
-export const indexedFailures = <Failures extends FailureAtIndex<any>[]>(
-  failures: Failures
-): IndexedFailures<_GetFailureFromIndexPair<Failures[number]>> => ({
-  validationType: 'IndexedFailures',
-  failures,
+export const indexedValidations = <Vs extends Validation[]>(...validations: Vs): IndexedValidations<Vs> => ({
+  validationType: 'IndexedValidations',
+  validations,
 })
 
 export interface UnexpectedLength {

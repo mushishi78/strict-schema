@@ -18,8 +18,7 @@ import {
   notInNumberRange,
   notInteger,
   notInStringRange,
-  indexedFailures,
-  failureAtIndex,
+  indexedValidations,
   unexpectedLength,
 } from './validation'
 
@@ -154,22 +153,27 @@ test('validateArray unexpectedTypeOf', (t) => {
   t.deepEqual(validateArray(array(integer), undefined, {}), unexpectedTypeOf('array', undefined))
 })
 
-test('validateArray indexedFailures', (t) => {
-  t.deepEqual(validateArray(array(integer), [1, 2, 34.67, 56], {}), indexedFailures([failureAtIndex(2, notInteger(34.67))]))
+test('validateArray indexedValidations', (t) => {
+  t.deepEqual(validateArray(array(integer), [1, 2, 34.67, 56], {}), indexedValidations(valid, valid, notInteger(34.67), valid))
   t.deepEqual(
     validateArray(array(integer), [1, '2', 34.67, 56], {}),
-    indexedFailures([failureAtIndex(1, unexpectedTypeOf('number', '2')), failureAtIndex(2, notInteger(34.67))])
+    indexedValidations(
+      valid,
+      unexpectedTypeOf('number', '2'),
+      notInteger(34.67),
+      valid
+    )
   )
   t.deepEqual(
     validateArray(array(array(integer)), [[1, 4], ['2']], {}),
-    indexedFailures([failureAtIndex(1, indexedFailures([failureAtIndex(0, unexpectedTypeOf('number', '2'))]))])
+    indexedValidations(valid, indexedValidations(unexpectedTypeOf('number', '2')))
   )
 })
 
 test('validateArray indexedReference', (t) => {
   t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34, 56, 1, 2], { num: integer }), valid)
   t.deepEqual(validateArray(array(indexedReference('num')), 0, { num: integer }), unexpectedTypeOf('array', 0))
-  t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34.67, 56], { num: integer }), indexedFailures([failureAtIndex(2, notInteger(34.67))]))
+  t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34.67, 56], { num: integer }), indexedValidations(valid, valid, notInteger(34.67), valid))
   t.throws(() => validateArray(array(indexedReference('missing')), [1, 2, 34, 56, 1, 2], {}))
 })
 
@@ -195,20 +199,20 @@ test('validateTuple unexpectedLength', (t) => {
   t.deepEqual(validateTuple(tuple(tuple(integer)), [[0], [1]], {}), unexpectedLength(1, [[0], [1]]))
 })
 
-test('validateTuple indexedFailures', (t) => {
-  t.deepEqual(validateTuple(tuple(integer), [0.23], {}), indexedFailures([failureAtIndex(0, notInteger(0.23))]))
+test('validateTuple indexedValidations', (t) => {
+  t.deepEqual(validateTuple(tuple(integer), [0.23], {}), indexedValidations(notInteger(0.23)))
   t.deepEqual(
     validateTuple(tuple(integer, boolean, integer), [1, 1, 1], {}),
-    indexedFailures([failureAtIndex(1, unexpectedTypeOf('boolean', 1))])
+    indexedValidations(valid, unexpectedTypeOf('boolean', 1), valid)
   )
   t.deepEqual(
     validateTuple(tuple(tuple(integer), tuple(boolean)), [[1], ['2']], {}),
-    indexedFailures([failureAtIndex(1, indexedFailures([failureAtIndex(0, unexpectedTypeOf('boolean', '2'))]))])
+    indexedValidations(valid, indexedValidations(unexpectedTypeOf('boolean', '2')))
   )
 })
 
 test('validateTuple indexedReference', (t) => {
   t.deepEqual(validateTuple(tuple(indexedReference('num')), [1], { num: integer }), valid)
-  t.deepEqual(validateTuple(tuple(boolean, indexedReference('num')), [true, 0.23], { num: integer }), indexedFailures([failureAtIndex(1, notInteger(0.23))]))
+  t.deepEqual(validateTuple(tuple(boolean, indexedReference('num')), [true, 0.23], { num: integer }), indexedValidations(valid, notInteger(0.23)))
   t.throws(() => validateTuple(tuple(indexedReference('missing')), [1], {}))
 })
