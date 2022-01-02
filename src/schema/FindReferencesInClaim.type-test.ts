@@ -16,7 +16,7 @@ import {
   tuple,
   fieldReference,
   IndexedReference,
-  FieldReference
+  FieldReference,
 } from './claims'
 
 {
@@ -125,12 +125,12 @@ import {
 {
   const claim = tuple(indexedReference('node'), integer, indexedReference('pilot'))
   type Actual = ReferenceLookup<typeof claim>
-  type Expected = { node: any, pilot: any }
+  type Expected = { node: any; pilot: any }
   assert<Equals<Actual, Expected>>()
 }
 {
   const claim = fields(fieldReference('a', 'node'), field('b', integer), fieldReference('b?', 'pilot'))
   type Actual = ReferenceLookup<typeof claim>
-  type Expected = { node: { a: any }, pilot: { b?: any } }
+  type Expected = { node: { a: any }; pilot: { b?: any } }
   assert<Equals<Actual, Expected>>()
 }

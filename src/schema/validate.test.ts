@@ -136,10 +136,14 @@ test('validateBoolean unexpectedTypeOf', (t) => {
 test('validateArray valid', (t) => {
   t.deepEqual(validateArray(array(integer), [1, 2, 34, 56, 1, 2], {}), valid)
   t.deepEqual(
-    validateArray(array(array(integer)), [
-      [1, 2],
-      [34, 56, 1, 2],
-    ], {}),
+    validateArray(
+      array(array(integer)),
+      [
+        [1, 2],
+        [34, 56, 1, 2],
+      ],
+      {}
+    ),
     valid
   )
   t.deepEqual(validateArray(array(constant(0)), [0, 0, 0, 0], {}), valid)
@@ -154,15 +158,13 @@ test('validateArray unexpectedTypeOf', (t) => {
 })
 
 test('validateArray indexedValidations', (t) => {
-  t.deepEqual(validateArray(array(integer), [1, 2, 34.67, 56], {}), indexedValidations(valid, valid, notInteger(34.67), valid))
+  t.deepEqual(
+    validateArray(array(integer), [1, 2, 34.67, 56], {}),
+    indexedValidations(valid, valid, notInteger(34.67), valid)
+  )
   t.deepEqual(
     validateArray(array(integer), [1, '2', 34.67, 56], {}),
-    indexedValidations(
-      valid,
-      unexpectedTypeOf('number', '2'),
-      notInteger(34.67),
-      valid
-    )
+    indexedValidations(valid, unexpectedTypeOf('number', '2'), notInteger(34.67), valid)
   )
   t.deepEqual(
     validateArray(array(array(integer)), [[1, 4], ['2']], {}),
@@ -173,7 +175,10 @@ test('validateArray indexedValidations', (t) => {
 test('validateArray indexedReference', (t) => {
   t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34, 56, 1, 2], { num: integer }), valid)
   t.deepEqual(validateArray(array(indexedReference('num')), 0, { num: integer }), unexpectedTypeOf('array', 0))
-  t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34.67, 56], { num: integer }), indexedValidations(valid, valid, notInteger(34.67), valid))
+  t.deepEqual(
+    validateArray(array(indexedReference('num')), [1, 2, 34.67, 56], { num: integer }),
+    indexedValidations(valid, valid, notInteger(34.67), valid)
+  )
   t.throws(() => validateArray(array(indexedReference('missing')), [1, 2, 34, 56, 1, 2], {}))
 })
 
@@ -213,6 +218,9 @@ test('validateTuple indexedValidations', (t) => {
 
 test('validateTuple indexedReference', (t) => {
   t.deepEqual(validateTuple(tuple(indexedReference('num')), [1], { num: integer }), valid)
-  t.deepEqual(validateTuple(tuple(boolean, indexedReference('num')), [true, 0.23], { num: integer }), indexedValidations(valid, notInteger(0.23)))
+  t.deepEqual(
+    validateTuple(tuple(boolean, indexedReference('num')), [true, 0.23], { num: integer }),
+    indexedValidations(valid, notInteger(0.23))
+  )
   t.throws(() => validateTuple(tuple(indexedReference('missing')), [1], {}))
 })

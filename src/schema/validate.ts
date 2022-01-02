@@ -69,8 +69,11 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [NotClaim<any>] ? Valid : // TODO
   TypeError<['ClaimValidation', 'unrecognized claim', C]>
 
-export type IndexedClaimValidation<C extends IndexedClaim, RL extends ReferenceLookup> = ClaimValidation<_ClaimForIndexedClaim<C, RL>, RL>
+// prettier-ignore
+export type IndexedClaimValidation<C extends IndexedClaim, RL extends ReferenceLookup> =
+  ClaimValidation<_ClaimForIndexedClaim<C, RL>, RL>
 
+// prettier-ignore
 type _ClaimForIndexedClaim<C extends IndexedClaim, RL extends ReferenceLookup> =
   [C] extends [IndexedReference<infer Ref>] ? RL[Ref] :
   [C] extends [Claim] ? C :
@@ -85,7 +88,7 @@ export type BooleanValidation = Valid | UnexpectedTypeOf
 export type ArrayValidation<C extends IndexedClaim, RL extends ReferenceLookup> =
   | Valid
   | UnexpectedTypeOf
-  | (IndexedClaimValidation<C, RL> extends infer V ? [V] extends [Validation] ? IndexedValidations<V[]> : V : never)
+  | (IndexedClaimValidation<C, RL> extends infer V ? ([V] extends [Validation] ? IndexedValidations<V[]> : V) : never)
 
 export type TupleValidation<Cs extends IndexedClaim[], RL extends ReferenceLookup> =
   | Valid
@@ -93,12 +96,17 @@ export type TupleValidation<Cs extends IndexedClaim[], RL extends ReferenceLooku
   | UnexpectedLength
   | IndexedValidations<_ValidationForTupleClaims<Cs, RL>>
 
+// prettier-ignore
 type _ValidationForTupleClaims<Cs extends IndexedClaim[], RL extends ReferenceLookup> =
   Cs extends [infer C, ...infer Rest] ? C extends IndexedClaim ? Rest extends IndexedClaim[] ?
   [IndexedClaimValidation<C, RL>, ..._ValidationForTupleClaims<Rest, RL>] :
   [] : [] : []
 
-export function validateClaim<C extends Claim, RL extends ReferenceLookup>(claim: C, value: unknown, referenceLookup: RL): ClaimValidation<C, RL> {
+export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
+  claim: C,
+  value: unknown,
+  referenceLookup: RL
+): ClaimValidation<C, RL> {
   if (isConstantClaim(claim)) return validateConstant(claim, value) as ClaimValidation<C, RL>
   if (isNumberRangeClaim(claim)) return validateNumberRange(claim, value) as ClaimValidation<C, RL>
   if (isIntegerClaim(claim)) return validateInteger(claim, value) as ClaimValidation<C, RL>
@@ -115,11 +123,14 @@ function lookupReference<RL extends ReferenceLookup, K extends keyof RL>(referen
   throw new Error(`Missing reference lookup: ${key} in ${referenceLookup}`)
 }
 
-function validateIndexedClaim<C extends IndexedClaim, RL extends ReferenceLookup>(claim: C, value: unknown, referenceLookup: RL): IndexedClaimValidation<C, RL> {
-  const claimToUse =
-    isIndexedReference(claim)
-      ? lookupReference(referenceLookup, claim.indexedReference) as _ClaimForIndexedClaim<C, RL>
-      : claim as _ClaimForIndexedClaim<C, RL>
+function validateIndexedClaim<C extends IndexedClaim, RL extends ReferenceLookup>(
+  claim: C,
+  value: unknown,
+  referenceLookup: RL
+): IndexedClaimValidation<C, RL> {
+  const claimToUse = isIndexedReference(claim)
+    ? (lookupReference(referenceLookup, claim.indexedReference) as _ClaimForIndexedClaim<C, RL>)
+    : (claim as _ClaimForIndexedClaim<C, RL>)
 
   return validateClaim(claimToUse, value, referenceLookup)
 }
@@ -151,15 +162,23 @@ export function validateBoolean(_: BooleanClaim, value: unknown): BooleanValidat
   return typeof value === 'boolean' ? valid : unexpectedTypeOf('boolean', value)
 }
 
-export function validateArray<NC extends IndexedClaim, RL extends ReferenceLookup>(claim: ArrayClaim<NC>, value: unknown, referenceLookup: RL): ArrayValidation<NC, RL> {
+export function validateArray<NC extends IndexedClaim, RL extends ReferenceLookup>(
+  claim: ArrayClaim<NC>,
+  value: unknown,
+  referenceLookup: RL
+): ArrayValidation<NC, RL> {
   if (!Array.isArray(value)) return unexpectedTypeOf('array', value)
 
   type Vs = _ValidationForTupleClaims<NC[], RL>
   const validations = value.map((v, i) => validateIndexedClaim(claim.array, v, referenceLookup) as Vs[typeof i])
-  return validations.every(isValid) ? valid : indexedValidations(...validations) as ArrayValidation<NC, RL>
+  return validations.every(isValid) ? valid : (indexedValidations(...validations) as ArrayValidation<NC, RL>)
 }
 
-export function validateTuple<NCs extends IndexedClaim[], RL extends ReferenceLookup>(claim: TupleClaim<NCs>, values: unknown, referenceLookup: RL): TupleValidation<NCs, RL> {
+export function validateTuple<NCs extends IndexedClaim[], RL extends ReferenceLookup>(
+  claim: TupleClaim<NCs>,
+  values: unknown,
+  referenceLookup: RL
+): TupleValidation<NCs, RL> {
   if (!Array.isArray(values)) return unexpectedTypeOf('array', values)
   if (values.length !== claim.tuple.length) return unexpectedLength(claim.tuple.length, values)
 

@@ -18,9 +18,7 @@ export type Claim =
   | OrClaim<any>
   | NotClaim<any>
 
-export type IndexedClaim =
-  | Claim
-  | IndexedReference<any>
+export type IndexedClaim = Claim | IndexedReference<any>
 
 export type ContantTypes = string | number | boolean | null | undefined | object | Array<any>
 export type ConstantClaim<T extends ContantTypes> = { constant: T }
@@ -56,11 +54,14 @@ export const isTupleClaim = (claim: unknown): claim is TupleClaim<any> => isObje
 
 export type IndexedReference<R extends string> = { indexedReference: R }
 export const indexedReference = <R extends string>(indexedReference: R): IndexedReference<R> => ({ indexedReference })
-export const isIndexedReference = (obj: unknown): obj is IndexedReference<any> => isObject(obj) && 'indexedReference' in obj
+export const isIndexedReference = (obj: unknown): obj is IndexedReference<any> =>
+  isObject(obj) && 'indexedReference' in obj
 
 export type Field = [string, Claim] | FieldReference<string, string>
 export type FieldReference<K extends string, R extends string> = { fieldReference: [K, R] }
-export const fieldReference = <K extends string, R extends string>(key: K, ref: R): FieldReference<K, R> => ({ fieldReference: [key, ref] })
+export const fieldReference = <K extends string, R extends string>(key: K, ref: R): FieldReference<K, R> => ({
+  fieldReference: [key, ref],
+})
 
 export type FieldsClaim<Fs extends Field[]> = { fields: Fs; exclusive: boolean }
 export const field = <K extends string, C extends Claim>(key: K, claim: C): [K, C] => [key, claim]

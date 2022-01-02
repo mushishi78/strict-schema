@@ -124,28 +124,33 @@ type FileBrand = { readonly __brand: unique symbol }
 }
 {
   const claim = tuple(integer, indexedReference('node'))
-  interface IActual extends Actual { }
+  interface IActual extends Actual {}
   type Actual = ValueOfClaim<typeof claim, { node: IActual }>
   type Expected = [number, Expected]
   assert<Equals<Actual, Expected>>()
 }
 {
   const claim = array(indexedReference('node'))
-  interface IActual extends Actual { }
+  interface IActual extends Actual {}
   type Actual = ValueOfClaim<typeof claim, { node: IActual }>
   type Expected = Expected[]
   assert<Equals<Actual, Expected>>()
 }
 {
+  // prettier-ignore
   const claim = fields(
     field('relations', fields(
       fieldReference('child?', 'child'),
       field('count', integer))))
 
-  interface IActual { child?: Actual }
+  interface IActual {
+    child?: Actual
+  }
   type Actual = ValueOfClaim<typeof claim, { child: IActual }>
 
-  interface IExpected { child?: Expected }
+  interface IExpected {
+    child?: Expected
+  }
   type Expected = {
     relations: IExpected & { count: number }
   }
@@ -157,39 +162,50 @@ type FileBrand = { readonly __brand: unique symbol }
     fields(
       field('type', or(constant('+'), constant('-'))),
       fieldReference('left?', 'left'),
-      fieldReference('right?', 'right')),
-    fields(
-      field('type', constant('num'))))
+      fieldReference('right?', 'right')
+    ),
+    fields(field('type', constant('num')))
+  )
 
-  interface ActualLeft { left?: Actual }
-  interface ActualRight { right?: Actual }
-  type Actual = ValueOfClaim<typeof claim, { left: ActualLeft, right: ActualRight }>
+  interface ActualLeft {
+    left?: Actual
+  }
+  interface ActualRight {
+    right?: Actual
+  }
+  type Actual = ValueOfClaim<typeof claim, { left: ActualLeft; right: ActualRight }>
 
-  interface ExpectedLeft { left?: Expected }
-  interface ExpectedRight { right?: Expected }
-  type Expected =
-    | ({ type: '+' | '-' } & ExpectedLeft & ExpectedRight)
-    | { type: 'num' }
+  interface ExpectedLeft {
+    left?: Expected
+  }
+  interface ExpectedRight {
+    right?: Expected
+  }
+  type Expected = ({ type: '+' | '-' } & ExpectedLeft & ExpectedRight) | { type: 'num' }
 
   assert<Equals<Actual, Expected>>()
 }
 {
-  const userClaim = fields(
-    field('type', constant('user')),
-    fieldReference('permission', 'permission'))
+  const userClaim = fields(field('type', constant('user')), fieldReference('permission', 'permission'))
 
-  const permissionClaim = fields(
-    field('type', constant('permission')),
-    fieldReference('authorizer', 'authorizer'))
+  const permissionClaim = fields(field('type', constant('permission')), fieldReference('authorizer', 'authorizer'))
 
-  interface IActualPermission { permission: ActualPermission }
+  interface IActualPermission {
+    permission: ActualPermission
+  }
   type ActualUser = ValueOfClaim<typeof userClaim, { permission: IActualPermission }>
 
-  interface IActualAuthorizer { authorizer: ActualUser }
+  interface IActualAuthorizer {
+    authorizer: ActualUser
+  }
   type ActualPermission = ValueOfClaim<typeof permissionClaim, { authorizer: IActualAuthorizer }>
 
-  interface IExpectedPermission { permission: ExpectedPermission }
-  interface IExpectedAuthorizer { authorizer: ExpectedUser }
+  interface IExpectedPermission {
+    permission: ExpectedPermission
+  }
+  interface IExpectedAuthorizer {
+    authorizer: ExpectedUser
+  }
   type ExpectedUser = { type: 'user' } & IExpectedPermission
   type ExpectedPermission = { type: 'permission' } & IExpectedAuthorizer
 

@@ -74,7 +74,11 @@ import {
 {
   const claim = tuple(constant(256), integer)
   type Actual = ClaimValidation<typeof claim, {}>
-  type Expected = Valid | UnexpectedTypeOf | UnexpectedLength | IndexedValidations<[Valid | NotConstant<256>, Valid | UnexpectedTypeOf | NotInteger]>
+  type Expected =
+    | Valid
+    | UnexpectedTypeOf
+    | UnexpectedLength
+    | IndexedValidations<[Valid | NotConstant<256>, Valid | UnexpectedTypeOf | NotInteger]>
   assert<Equals<Actual, Expected>>()
 }
 {
@@ -84,19 +88,29 @@ import {
     | Valid
     | UnexpectedTypeOf
     | UnexpectedLength
-    | IndexedValidations<[Valid | UnexpectedTypeOf | UnexpectedLength | IndexedValidations<[Valid | UnexpectedTypeOf | NotInteger]>]>
+    | IndexedValidations<
+        [Valid | UnexpectedTypeOf | UnexpectedLength | IndexedValidations<[Valid | UnexpectedTypeOf | NotInteger]>]
+      >
   assert<Equals<Actual, Expected>>()
 }
 {
   const claim = tuple(indexedReference('num'))
   type Actual = ClaimValidation<typeof claim, { num: 'Integer' }>
-  type Expected = Valid | UnexpectedTypeOf | UnexpectedLength | IndexedValidations<[Valid | UnexpectedTypeOf | NotInteger]>
+  type Expected =
+    | Valid
+    | UnexpectedTypeOf
+    | UnexpectedLength
+    | IndexedValidations<[Valid | UnexpectedTypeOf | NotInteger]>
   assert<Equals<Actual, Expected>>()
 }
 {
   const claim = tuple(constant(0), indexedReference('num'))
   type Actual = ClaimValidation<typeof claim, { num: 'Integer' }>
-  type Expected = Valid | UnexpectedTypeOf | UnexpectedLength | IndexedValidations<[Valid | NotConstant<0>, Valid | UnexpectedTypeOf | NotInteger]>
+  type Expected =
+    | Valid
+    | UnexpectedTypeOf
+    | UnexpectedLength
+    | IndexedValidations<[Valid | NotConstant<0>, Valid | UnexpectedTypeOf | NotInteger]>
   assert<Equals<Actual, Expected>>()
 }
 {
@@ -110,5 +124,4 @@ import {
       assert<Equals<typeof v1, UnexpectedTypeOf | NotInteger>>()
     }
   }
-
 }
