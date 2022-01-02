@@ -53,28 +53,31 @@ type ValueOfIndexedClaim<C extends IndexedClaim, Refs extends References> =
 // prettier-ignore
 type ValueOfTuple<Cs extends IndexedClaim[], Refs extends References> =
   Cs extends [infer C1, ...infer Cs] ? C1 extends IndexedClaim ? Cs extends IndexedClaim[] ?
-  [ValueOfIndexedClaim<C1, Refs>, ...ValueOfTuple<Cs, Refs>] : [] : [] : []
+    [ValueOfIndexedClaim<C1, Refs>, ...ValueOfTuple<Cs, Refs>] : [] : [] :
+  []
 
 // prettier-ignore
 type ValueOfFields<Fields extends Field[], Refs extends References> =
   Fields extends [infer F, ...infer Fs] ? F extends Field ? Fs extends Field[] ?
-  ValueOfField<F, Refs> & ValueOfFields<Fs, Refs> : {} : {} : {}
+    ValueOfField<F, Refs> & ValueOfFields<Fs, Refs> : {} : {} :
+  {}
 
 // prettier-ignore
 type ValueOfField<F extends Field, Refs extends References> =
   F extends FieldReference<infer Key, `${infer Ref}`> ? Refs[Ref] :
 
-  F extends [`${infer Key}?`, infer C2] ? C2 extends Claim
-    ? { [k in Key]?: _ValueOfClaim<C2, Refs> }
-    : TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
+  F extends [`${infer Key}?`, infer C2] ? C2 extends Claim ?
+    { [k in Key]?: _ValueOfClaim<C2, Refs> } :
+    TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
 
-  F extends [`${infer Key}`, infer C2] ? C2 extends Claim
-    ? { [k in Key]: _ValueOfClaim<C2, Refs> }
-    : TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
+  F extends [`${infer Key}`, infer C2] ? C2 extends Claim ?
+    { [k in Key]: _ValueOfClaim<C2, Refs> } :
+    TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
 
   TypeError<['ValueOfField', 'Unrecognized field', F]>
 
 // prettier-ignore
 type ValueOfIntersection<Cs extends Claim[], Refs extends References> =
   Cs extends [infer C1, ...infer Cs] ? C1 extends Claim ? Cs extends Claim[] ?
-  _ValueOfClaim<C1, Refs> & ValueOfIntersection<Cs, Refs> : {} : {} : {}
+    _ValueOfClaim<C1, Refs> & ValueOfIntersection<Cs, Refs> : {} : {} :
+  {}

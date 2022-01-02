@@ -99,8 +99,8 @@ export type TupleValidation<Cs extends IndexedClaim[], RL extends ReferenceLooku
 // prettier-ignore
 type _ValidationForTupleClaims<Cs extends IndexedClaim[], RL extends ReferenceLookup> =
   Cs extends [infer C, ...infer Rest] ? C extends IndexedClaim ? Rest extends IndexedClaim[] ?
-  [IndexedClaimValidation<C, RL>, ..._ValidationForTupleClaims<Rest, RL>] :
-  [] : [] : []
+    [IndexedClaimValidation<C, RL>, ..._ValidationForTupleClaims<Rest, RL>] : [] : [] :
+  []
 
 export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   claim: C,
