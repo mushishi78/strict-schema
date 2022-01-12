@@ -12,6 +12,8 @@ export type Failure =
   | NotInStringRange
   | IndexedValidations<any>
   | UnexpectedLength
+  | KeyedValidations<any>
+  | Missing
 
 export interface Valid {
   validationType: 'Valid'
@@ -99,3 +101,24 @@ export const unexpectedLength = (length: number, value: unknown[]): UnexpectedLe
   length,
   value,
 })
+
+export interface KeyedValidations<Vs extends Record<string, Validation>> {
+  validationType: 'KeyedValidations'
+  validations: Vs
+  unexpectedKeys: string[]
+}
+
+export const keyedValidations = <Vs extends Record<string, Validation>>(
+  validations: Vs,
+  unexpectedKeys: string[]
+): KeyedValidations<Vs> => ({
+  validationType: 'KeyedValidations',
+  validations,
+  unexpectedKeys,
+})
+
+export interface Missing {
+  validationType: 'Missing'
+}
+
+export const missing: Missing = { validationType: 'Missing' }

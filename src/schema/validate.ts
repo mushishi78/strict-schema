@@ -1,5 +1,5 @@
 import { isInNumberRange } from '../lib/number-range'
-import { TypeError } from '../lib/type-helpers'
+import { isNever, TypeError } from '../lib/type-helpers'
 
 import {
   ContantTypes,
@@ -27,6 +27,8 @@ import {
   AndClaim,
   OrClaim,
   NotClaim,
+  Field,
+  FieldReference,
 } from './claims'
 
 import {
@@ -48,6 +50,10 @@ import {
   UnexpectedLength,
   unexpectedLength,
   isValid,
+  KeyedValidations,
+  missing,
+  keyedValidations,
+  Missing,
 } from './validation'
 
 type ReferenceLookup = Record<string, Claim>
@@ -61,7 +67,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [BooleanClaim] ? BooleanValidation :
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
-  [C] extends [FieldsClaim<any>] ? Valid : // TODO
+  [C] extends [FieldsClaim<infer Fields>] ? FieldsValidation<Fields, RL> :
   [C] extends [BrandClaim<any>] ? Valid : // TODO
   [C] extends [InstanceOfClaim<any>] ? Valid : // TODO
   [C] extends [AndClaim<any>] ? Valid : // TODO
@@ -101,6 +107,25 @@ type _ValidationForTupleClaims<Cs extends IndexedClaim[], RL extends ReferenceLo
   Cs extends [infer C, ...infer Rest] ? C extends IndexedClaim ? Rest extends IndexedClaim[] ?
     [IndexedClaimValidation<C, RL>, ..._ValidationForTupleClaims<Rest, RL>] : [] : [] :
   []
+
+export type FieldsValidation<Fs extends Field[], RL extends ReferenceLookup> =
+  | Valid
+  | UnexpectedTypeOf
+  | KeyedValidations<_ValidationForFieldClaims<Fs, RL>>
+
+// prettier-ignore
+type _ValidationForFieldClaims<Fs extends Field[], RL extends ReferenceLookup> =
+  Fs extends [infer F, ...infer Rest] ? F extends Field ? Rest extends Field[] ?
+    _ValidationForFieldClaim<F, RL> & _ValidationForFieldClaims<Rest, RL> : {} : {} :
+  {}
+
+// prettier-ignore
+type _ValidationForFieldClaim<F extends Field, RL extends ReferenceLookup> =
+  F extends FieldReference<`${infer Key}?`, infer Ref> ? { [k in Key]: ClaimValidation<RL[Ref], RL> } :
+  F extends FieldReference<infer Key, infer Ref> ? { [k in Key]: ClaimValidation<RL[Ref], RL> | Missing } :
+  F extends [`${infer Key}?`, infer Value] ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> } : never :
+  F extends [`${infer Key}`, infer Value] ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> | Missing } : never :
+  never
 
 export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   claim: C,
@@ -190,4 +215,67 @@ export function validateTuple<NCs extends IndexedClaim[], RL extends ReferenceLo
   })
 
   return validations.every(isValid) ? valid : indexedValidations(...validations)
+}
+
+export function validateFields<Fields extends Field[], RL extends ReferenceLookup>(
+  claim: FieldsClaim<Fields>,
+  obj: unknown,
+  referenceLookup: RL
+): FieldsValidation<Fields, RL> {
+  if (!isRecord(obj)) return unexpectedTypeOf('object', obj)
+
+  type Vs = _ValidationForFieldClaims<Fields, RL>
+  const validations = {} as Vs
+  const expectedKeys: string[] = []
+  let isValid = true
+
+  for (const field of claim.fields) {
+    const [key, isOptional] = getFieldKey(field)
+
+    expectedKeys.push(key)
+
+    // If the expected key isn't there
+    if (!(key in obj)) {
+      const validation = isOptional ? valid : missing
+      if (validation !== valid) isValid = false
+
+      Object.assign(validations, { [key]: validation })
+      continue
+    }
+
+    // Otherwise validate the claim for the field
+    const value = obj[key]
+    const claim = getFieldClaim(field, referenceLookup)
+    const validation = validateClaim(claim, value, referenceLookup)
+    if (validation !== valid) isValid = false
+
+    Object.assign(validations, { [key]: validation })
+  }
+
+  // Collect all the unexpected keys in the object
+  const unexpectedKeys = Object.keys(obj).filter((key) => !expectedKeys.includes(key))
+  if (claim.exclusive && unexpectedKeys.length > 0) isValid = false
+
+  // Return validation
+  return isValid ? valid : keyedValidations(validations, unexpectedKeys)
+}
+
+function isRecord(obj: unknown): obj is Record<string, unknown> {
+  return typeof obj === 'object' && obj !== null && !Array.isArray(obj)
+}
+
+function getFieldKey(field: Field): [string, boolean] {
+  if ('fieldReference' in field) return trimQuestionMark(field.fieldReference[0])
+  if (Array.isArray(field)) return trimQuestionMark(field[0])
+  throw isNever(field)
+}
+
+function getFieldClaim<RL extends ReferenceLookup>(field: Field, referenceLookup: RL) {
+  if ('fieldReference' in field) return lookupReference(referenceLookup, field.fieldReference[1])
+  if (Array.isArray(field)) return field[1]
+  throw isNever(field)
+}
+
+function trimQuestionMark(fieldName: string): [string, boolean] {
+  return fieldName.endsWith('?') ? [fieldName.slice(0, fieldName.length - 1), true] : [fieldName, false]
 }

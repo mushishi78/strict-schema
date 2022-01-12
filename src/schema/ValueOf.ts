@@ -64,6 +64,7 @@ type ValueOfFields<Fields extends Field[], Refs extends References> =
 
 // prettier-ignore
 type ValueOfField<F extends Field, Refs extends References> =
+  F extends FieldReference<`${infer Key}?`, `${infer Ref}`> ? Refs[Ref] :
   F extends FieldReference<infer Key, `${infer Ref}`> ? Refs[Ref] :
 
   F extends [`${infer Key}?`, infer C2] ? C2 extends Claim ?

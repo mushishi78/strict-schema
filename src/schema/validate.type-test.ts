@@ -1,6 +1,18 @@
 import { assert, Equals } from 'tsafe'
-import { ClaimValidation, validateClaim } from './validate'
-import { array, boolean, constant, indexedReference, integer, numberRange, stringRange, tuple } from './claims'
+import { BooleanValidation, ClaimValidation, IntegerValidation, validateClaim } from './validate'
+import {
+  array,
+  boolean,
+  constant,
+  field,
+  fieldReference,
+  fields,
+  indexedReference,
+  integer,
+  numberRange,
+  stringRange,
+  tuple,
+} from './claims'
 
 import {
   Valid,
@@ -12,6 +24,8 @@ import {
   IndexedValidations,
   UnexpectedLength,
   isValid,
+  KeyedValidations,
+  Missing,
 } from './validation'
 
 {
@@ -122,6 +136,57 @@ import {
     }
     if (!isValid(v1)) {
       assert<Equals<typeof v1, UnexpectedTypeOf | NotInteger>>()
+    }
+  }
+}
+{
+  const claim = fields(field('a', integer), field('b', boolean))
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected =
+    | Valid
+    | UnexpectedTypeOf
+    | KeyedValidations<{ a: IntegerValidation | Missing } & { b: BooleanValidation | Missing }>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = fields(fieldReference('a', 'num'), field('b', boolean))
+  const lookup = { num: integer }
+  type Actual = ClaimValidation<typeof claim, typeof lookup>
+  type Expected =
+    | Valid
+    | UnexpectedTypeOf
+    | KeyedValidations<{ a: IntegerValidation | Missing } & { b: BooleanValidation | Missing }>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = fields(field('a?', integer), field('b', boolean))
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected =
+    | Valid
+    | UnexpectedTypeOf
+    | KeyedValidations<{ a: IntegerValidation } & { b: BooleanValidation | Missing }>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = fields(fieldReference('a?', 'num'), field('b', boolean))
+  const lookup = { num: integer }
+  type Actual = ClaimValidation<typeof claim, typeof lookup>
+  type Expected =
+    | Valid
+    | UnexpectedTypeOf
+    | KeyedValidations<{ a: IntegerValidation } & { b: BooleanValidation | Missing }>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = fields(field('a?', integer), field('b', boolean))
+  const validation = validateClaim(claim, { a: 234.5 }, {})
+  if (validation.validationType === 'KeyedValidations') {
+    const { a, b } = validation.validations
+    if (!isValid(a)) {
+      assert<Equals<typeof a, UnexpectedTypeOf | NotInteger>>()
+    }
+    if (!isValid(b)) {
+      assert<Equals<typeof b, UnexpectedTypeOf | Missing>>()
     }
   }
 }

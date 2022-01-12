@@ -1,10 +1,24 @@
 import test from 'ava'
-import { array, boolean, constant, indexedReference, integer, numberRange, stringRange, tuple } from './claims'
+import {
+  array,
+  boolean,
+  constant,
+  exclusiveFields,
+  field,
+  fieldReference,
+  fields,
+  indexedReference,
+  integer,
+  numberRange,
+  stringRange,
+  tuple,
+} from './claims'
 
 import {
   validateArray,
   validateBoolean,
   validateConstant,
+  validateFields,
   validateInteger,
   validateNumberRange,
   validateStringRange,
@@ -20,6 +34,8 @@ import {
   notInStringRange,
   indexedValidations,
   unexpectedLength,
+  keyedValidations,
+  missing,
 } from './validation'
 
 test('validateConstant valid', (t) => {
@@ -223,4 +239,55 @@ test('validateTuple indexedReference', (t) => {
     indexedValidations(valid, notInteger(0.23))
   )
   t.throws(() => validateTuple(tuple(indexedReference('missing')), [1], {}))
+})
+
+test('validateFields valid', (t) => {
+  t.deepEqual(validateFields(fields(field('a', integer)), { a: 23 }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer), field('b?', boolean)), { a: 23 }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer), field('b?', boolean)), { a: 23, b: false }, {}), valid)
+  t.deepEqual(validateFields(fields(fieldReference('a', 'n')), { a: true }, { n: boolean }), valid)
+  t.deepEqual(validateFields(fields(fieldReference('a?', 'n')), { a: true }, { n: boolean }), valid)
+  t.deepEqual(validateFields(fields(fieldReference('a?', 'n')), {}, { n: boolean }), valid)
+  t.deepEqual(validateFields(fields(field('a', integer)), { a: 23, b: 34 }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer)), { a: 23, b: { c: 'Hello' } }, {}), valid)
+})
+
+test('validateFields unexpectedTypeOf', (t) => {
+  t.deepEqual(validateFields(fields(field('a', integer)), 23, {}), unexpectedTypeOf('object', 23))
+  t.deepEqual(validateFields(fields(field('a', integer)), [23], {}), unexpectedTypeOf('object', [23]))
+  t.deepEqual(validateFields(fields(field('a', integer)), [{ a: 23 }], {}), unexpectedTypeOf('object', [{ a: 23 }]))
+})
+
+test('validateFields missing', (t) => {
+  t.deepEqual(validateFields(fields(field('a', integer)), { b: 23 }, {}), keyedValidations({ a: missing }, ['b']))
+  t.deepEqual(
+    validateFields(fields(field('a', integer), field('b?', boolean)), { b: false }, {}),
+    keyedValidations({ a: missing, b: valid }, [])
+  )
+  t.deepEqual(
+    validateFields(fields(fieldReference('a', 'n')), { b: 49 }, { n: boolean }),
+    keyedValidations({ a: missing }, ['b'])
+  )
+})
+
+test('validateFields unexpectedKeys', (t) => {
+  t.deepEqual(
+    validateFields(exclusiveFields(field('a', integer)), { a: 23, b: 'void' }, {}),
+    keyedValidations({ a: valid }, ['b'])
+  )
+})
+
+test('validateFields keyedValidations', (t) => {
+  t.deepEqual(
+    validateFields(fields(field('a', integer)), { a: 23.5 }, {}),
+    keyedValidations({ a: notInteger(23.5) }, [])
+  )
+})
+
+test('validateFields fieldReference', (t) => {
+  t.deepEqual(
+    validateFields(fields(fieldReference('a', 'n')), { a: 23.5 }, { n: integer }),
+    keyedValidations({ a: notInteger(23.5) }, [])
+  )
+  t.deepEqual(validateFields(fields(fieldReference('a', 'n')), { a: 23 }, { n: integer }), valid)
 })
