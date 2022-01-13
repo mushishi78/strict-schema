@@ -14,7 +14,6 @@ import {
   FieldsClaim,
   BrandClaim,
   InstanceOfClaim,
-  AndClaim,
   OrClaim,
   NotClaim,
   IndexedReference,
@@ -39,7 +38,6 @@ type _ValueOfClaim<C extends Claim, Refs extends References> =
   C extends FieldsClaim<infer Fields> ? Unite<ValueOfFields<Fields, Refs>> :
   C extends BrandClaim<infer Brand> ? Brand :
   C extends InstanceOfClaim<infer Constructor> ? InstanceType<Constructor> :
-  C extends AndClaim<infer Cs> ? ValueOfIntersection<Cs, Refs> :
   C extends OrClaim<infer Cs> ? _ValueOfClaim<Cs[number], Refs> :
   C extends NotClaim<infer C> ? _ValueOfClaim<C, Refs> :
   TypeError<['ValueOfClaim', 'Unrecognized claim', C]>
@@ -76,9 +74,3 @@ type ValueOfField<F extends Field, Refs extends References> =
     TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
 
   TypeError<['ValueOfField', 'Unrecognized field', F]>
-
-// prettier-ignore
-type ValueOfIntersection<Cs extends Claim[], Refs extends References> =
-  Cs extends [infer C1, ...infer Cs] ? C1 extends Claim ? Cs extends Claim[] ?
-    _ValueOfClaim<C1, Refs> & ValueOfIntersection<Cs, Refs> : {} : {} :
-  {}

@@ -1,7 +1,6 @@
 import { isObject } from 'remeda'
 import { NumberRange } from '../lib/number-range'
 import { StringRange } from '../lib/string-range'
-import { _Combinations } from '../lib/type-helpers'
 
 export type Claim =
   | ConstantClaim<any>
@@ -14,7 +13,6 @@ export type Claim =
   | FieldsClaim<any>
   | BrandClaim<any>
   | InstanceOfClaim<any>
-  | AndClaim<any>
   | OrClaim<any>
   | NotClaim<any>
 
@@ -83,15 +81,6 @@ export const instanceOf = <C extends Constructor = never>(instanceOf: C): Instan
 })
 export const isInstanceOfClaim = (claim: unknown): claim is InstanceOfClaim<any> =>
   isObject(claim) && 'instanceOf' in claim
-
-export type AndCombiniations =
-  | _Combinations<[IntegerClaim, NumberRangeClaim]>
-  | _Combinations<[IntegerClaim, NumberRangeClaim, BrandClaim<any>]>
-  | _Combinations<[BrandClaim<any>, Exclude<Claim, BrandClaim<any>>]>
-
-export type AndClaim<Cs extends AndCombiniations> = { and: Cs }
-export const and = <Cs extends AndCombiniations>(...and: Cs): AndClaim<Cs> => ({ and })
-export const isAndClaim = (claim: unknown): claim is AndClaim<any> => isObject(claim) && 'and' in claim
 
 export type OrClaim<Cs extends Claim[]> = { or: Cs }
 export const or = <Cs extends Claim[]>(...or: Cs): OrClaim<Cs> => ({ or })

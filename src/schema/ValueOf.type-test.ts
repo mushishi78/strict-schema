@@ -2,7 +2,6 @@ import { ValueOfClaim } from './ValueOf'
 import { assert, Equals } from 'tsafe'
 
 import {
-  and,
   array,
   boolean,
   brand,
@@ -83,12 +82,6 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = and(integer, brand<FileBrand>())
-  type Actual = ValueOfClaim<typeof claim, {}>
-  type Expected = number & FileBrand
-  assert<Equals<Actual, Expected>>()
-}
-{
   const claim = or(integer, boolean)
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = number | boolean
@@ -140,13 +133,13 @@ type FileBrand = { readonly __brand: unique symbol }
   // prettier-ignore
   const claim = fields(
     field('relations', fields(
-      fieldReference('child?', 'child'),
+      fieldReference('child?', 'childRef'),
       field('count', integer))))
 
   interface IActual {
     child?: Actual
   }
-  type Actual = ValueOfClaim<typeof claim, { child: IActual }>
+  type Actual = ValueOfClaim<typeof claim, { childRef: IActual }>
 
   interface IExpected {
     child?: Expected

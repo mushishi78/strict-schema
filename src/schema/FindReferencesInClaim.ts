@@ -11,7 +11,6 @@ import {
   FieldsClaim,
   BrandClaim,
   InstanceOfClaim,
-  AndClaim,
   OrClaim,
   NotClaim,
   IndexedReference,
@@ -45,7 +44,6 @@ export type FindReferencesInClaim<C extends Claim> =
   [C] extends [FieldsClaim<infer Fields>] ? FindReferencesInFields<Fields> :
   [C] extends [BrandClaim<any>] ? [] :
   [C] extends [InstanceOfClaim<any>] ? [] :
-  [C] extends [AndClaim<infer Cs>] ? FindReferencesInTuple<Cs> :
   [C] extends [OrClaim<infer Cs>] ? FindReferencesInTuple<Cs> :
   [C] extends [NotClaim<infer C>] ? FindReferencesInClaim<C> :
   [TypeError<['FindReferencesInClaim', 'Unrecognized claim', C]>]
