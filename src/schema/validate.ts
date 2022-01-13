@@ -1,17 +1,17 @@
-import { isInNumberRange } from '../lib/number-range'
+import { isInNumberRanges } from '../lib/number-range'
 import { isNever, TypeError } from '../lib/type-helpers'
 
 import {
   ContantTypes,
   ConstantClaim,
-  NumberRangeClaim,
+  NumberClaim,
   IntegerClaim,
   StringRangeClaim,
   BooleanClaim,
   ArrayClaim,
   Claim,
   isConstantClaim,
-  isNumberRangeClaim,
+  isNumberClaim,
   isIntegerClaim,
   isBooleanClaim,
   isArrayClaim,
@@ -34,14 +34,14 @@ import {
   valid,
   notConstant,
   unexpectedTypeOf,
-  notInNumberRange,
+  notInNumberRanges,
   notInteger,
   notInStringRange,
   indexedValidations,
   Valid,
   NotConstant,
   UnexpectedTypeOf,
-  NotInNumberRange,
+  NotInNumberRanges,
   NotInteger,
   NotInStringRange,
   IndexedValidations,
@@ -60,7 +60,7 @@ type ReferenceLookup = Record<string, Claim>
 // prettier-ignore
 export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [ConstantClaim<infer Const>] ? ConstantValidation<Const> :
-  [C] extends [NumberRangeClaim] ? NumberRangeValidation :
+  [C] extends [NumberClaim] ? NumberValidation :
   [C] extends [IntegerClaim] ? IntegerValidation :
   [C] extends [StringRangeClaim] ? StringRangeValidation :
   [C] extends [BooleanClaim] ? BooleanValidation :
@@ -83,7 +83,7 @@ type _ClaimForIndexedClaim<C extends IndexedClaim, RL extends ReferenceLookup> =
   never
 
 export type ConstantValidation<Constant extends ContantTypes> = Valid | NotConstant<Constant>
-export type NumberRangeValidation = Valid | UnexpectedTypeOf | NotInNumberRange
+export type NumberValidation = Valid | UnexpectedTypeOf | NotInNumberRanges
 export type IntegerValidation = Valid | UnexpectedTypeOf | NotInteger
 export type StringRangeValidation = Valid | UnexpectedTypeOf | NotInStringRange
 export type BooleanValidation = Valid | UnexpectedTypeOf
@@ -130,7 +130,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   referenceLookup: RL
 ): ClaimValidation<C, RL> {
   if (isConstantClaim(claim)) return validateConstant(claim, value) as ClaimValidation<C, RL>
-  if (isNumberRangeClaim(claim)) return validateNumberRange(claim, value) as ClaimValidation<C, RL>
+  if (isNumberClaim(claim)) return validateNumber(claim, value) as ClaimValidation<C, RL>
   if (isIntegerClaim(claim)) return validateInteger(claim, value) as ClaimValidation<C, RL>
   if (isStringRangeClaim(claim)) return validateStringRange(claim, value) as ClaimValidation<C, RL>
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
@@ -165,9 +165,11 @@ export function validateConstant<Constant extends ContantTypes>(
   return Object.is(value, constant) ? valid : notConstant(constant, value)
 }
 
-export function validateNumberRange(claim: NumberRangeClaim, value: unknown): NumberRangeValidation {
+export function validateNumber(claim: NumberClaim, value: unknown): NumberValidation {
+  const ranges = claim.numberRanges
   if (typeof value !== 'number') return unexpectedTypeOf('number', value)
-  return isInNumberRange(claim.numberRange, value) ? valid : notInNumberRange(claim.numberRange, value)
+  if (ranges.length > 0 && !isInNumberRanges(ranges, value)) return notInNumberRanges(ranges, value)
+  return valid
 }
 
 export function validateInteger(_: IntegerClaim, value: unknown): IntegerValidation {

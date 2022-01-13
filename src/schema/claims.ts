@@ -4,7 +4,7 @@ import { StringRange } from '../lib/string-range'
 
 export type Claim =
   | ConstantClaim<any>
-  | NumberRangeClaim
+  | NumberClaim
   | IntegerClaim
   | StringRangeClaim
   | BooleanClaim
@@ -23,10 +23,9 @@ export const constant = <T extends ContantTypes>(constant: T): ConstantClaim<T> 
 export const isConstantClaim = (claim: unknown): claim is ConstantClaim<ContantTypes> =>
   isObject(claim) && 'constant' in claim
 
-export type NumberRangeClaim = { numberRange: NumberRange }
-export const numberRange = (numberRange: NumberRange): NumberRangeClaim => ({ numberRange })
-export const isNumberRangeClaim = (claim: unknown): claim is NumberRangeClaim =>
-  isObject(claim) && 'numberRange' in claim
+export type NumberClaim = { numberRanges: NumberRange[] }
+export const number = (...numberRanges: NumberRange[]): NumberClaim => ({ numberRanges })
+export const isNumberClaim = (claim: unknown): claim is NumberClaim => isObject(claim) && 'numberRanges' in claim
 
 export type IntegerClaim = 'Integer'
 export const integer: IntegerClaim = 'Integer'

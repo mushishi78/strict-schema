@@ -9,7 +9,7 @@ import {
   fields,
   indexedReference,
   integer,
-  numberRange,
+  number,
   stringRange,
   tuple,
 } from './claims'
@@ -18,7 +18,7 @@ import {
   Valid,
   NotConstant,
   NotInteger,
-  NotInNumberRange,
+  NotInNumberRanges,
   UnexpectedTypeOf,
   NotInStringRange,
   IndexedValidations,
@@ -35,9 +35,9 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = numberRange([34, '< n <', 100])
+  const claim = number([34, '< n <', 100])
   type Actual = ClaimValidation<typeof claim, {}>
-  type Expected = Valid | UnexpectedTypeOf | NotInNumberRange
+  type Expected = Valid | UnexpectedTypeOf | NotInNumberRanges
   assert<Equals<Actual, Expected>>()
 }
 {

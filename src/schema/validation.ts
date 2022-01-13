@@ -7,7 +7,7 @@ export type Validation = Valid | Failure
 export type Failure =
   | NotConstant<any>
   | UnexpectedTypeOf
-  | NotInNumberRange
+  | NotInNumberRanges
   | NotInteger
   | NotInStringRange
   | IndexedValidations<any>
@@ -49,15 +49,15 @@ export const unexpectedTypeOf = (expectedTypeOf: string, value: unknown): Unexpe
   value,
 })
 
-export interface NotInNumberRange {
-  validationType: 'NotInNumberRange'
-  numberRange: NumberRange
+export interface NotInNumberRanges {
+  validationType: 'NotInNumberRanges'
+  numberRanges: NumberRange[]
   value: number
 }
 
-export const notInNumberRange = (numberRange: NumberRange, value: number): NotInNumberRange => ({
-  validationType: 'NotInNumberRange',
-  numberRange,
+export const notInNumberRanges = (numberRanges: NumberRange[], value: number): NotInNumberRanges => ({
+  validationType: 'NotInNumberRanges',
+  numberRanges,
   value,
 })
 

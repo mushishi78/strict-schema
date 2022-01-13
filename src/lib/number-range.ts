@@ -26,3 +26,7 @@ export function isInNumberRange(range: NumberRange, number: number): boolean {
       return false
   }
 }
+
+export function isInNumberRanges(ranges: NumberRange[], number: number): boolean {
+  return ranges.some(range => isInNumberRange(range, number))
+}

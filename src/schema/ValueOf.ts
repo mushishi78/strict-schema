@@ -5,7 +5,7 @@ import { TypeError } from '../lib/type-helpers'
 import {
   Claim,
   ConstantClaim,
-  NumberRangeClaim,
+  NumberClaim,
   IntegerClaim,
   StringRangeClaim,
   BooleanClaim,
@@ -28,7 +28,7 @@ export type ValueOfClaim<C extends Claim, Refs extends ReferenceLookup<C>> = _Va
 // prettier-ignore
 type _ValueOfClaim<C extends Claim, Refs extends References> =
   C extends ConstantClaim<infer Constant> ? Constant :
-  C extends NumberRangeClaim ? number :
+  C extends NumberClaim ? number :
   C extends IntegerClaim ? number :
   C extends StringRangeClaim ? string :
   C extends BooleanClaim ? boolean :

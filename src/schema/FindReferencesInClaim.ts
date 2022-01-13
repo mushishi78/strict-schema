@@ -2,7 +2,7 @@ import { TypeError } from '../lib/type-helpers'
 import {
   Claim,
   ConstantClaim,
-  NumberRangeClaim,
+  NumberClaim,
   IntegerClaim,
   StringRangeClaim,
   BooleanClaim,
@@ -34,7 +34,7 @@ type LookupFromReference<R> =
 // prettier-ignore
 export type FindReferencesInClaim<C extends Claim> =
   [C] extends [ConstantClaim<any>] ? [] :
-  [C] extends [NumberRangeClaim] ? [] :
+  [C] extends [NumberClaim] ? [] :
   [C] extends [IntegerClaim] ? [] :
   [C] extends [StringRangeClaim] ? [] :
   [C] extends [BooleanClaim] ? [] :

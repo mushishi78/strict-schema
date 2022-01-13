@@ -10,7 +10,7 @@ import {
   fields,
   instanceOf,
   integer,
-  numberRange,
+  number,
   indexedReference,
   stringRange,
   tuple,
@@ -26,7 +26,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = numberRange([0, '< n <', 10])
+  const claim = number([0, '< n <', 10])
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = []
   assert<Equals<Actual, Expected>>()

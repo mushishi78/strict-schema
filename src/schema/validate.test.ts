@@ -9,7 +9,7 @@ import {
   fields,
   indexedReference,
   integer,
-  numberRange,
+  number,
   stringRange,
   tuple,
 } from './claims'
@@ -20,7 +20,7 @@ import {
   validateConstant,
   validateFields,
   validateInteger,
-  validateNumberRange,
+  validateNumber,
   validateStringRange,
   validateTuple,
 } from './validate'
@@ -29,7 +29,7 @@ import {
   valid,
   notConstant,
   unexpectedTypeOf,
-  notInNumberRange,
+  notInNumberRanges,
   notInteger,
   notInStringRange,
   indexedValidations,
@@ -68,36 +68,40 @@ test('validateConstant notConstant', (t) => {
   t.deepEqual(validateConstant(constant(-Infinity), Infinity), notConstant(-Infinity, Infinity))
 })
 
-test('validateNumberRange valid', (t) => {
-  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), 1), valid)
-  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), 3.5674), valid)
-  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), 4.9), valid)
-  t.deepEqual(validateNumberRange(numberRange([0, '<= n <=', 5]), 0), valid)
-  t.deepEqual(validateNumberRange(numberRange([0, '<= n <=', 5]), 5), valid)
-  t.deepEqual(validateNumberRange(numberRange([-Infinity, '<= n <=', Infinity]), -Infinity), valid)
-  t.deepEqual(validateNumberRange(numberRange([-Infinity, '<= n <=', Infinity]), Infinity), valid)
+test('validateNumber valid', (t) => {
+  t.deepEqual(validateNumber(number(), 1), valid)
+  t.deepEqual(validateNumber(number(), -1), valid)
+  t.deepEqual(validateNumber(number([0, '< n <', 5]), 1), valid)
+  t.deepEqual(validateNumber(number([0, '< n <', 5]), 3.5674), valid)
+  t.deepEqual(validateNumber(number([0, '< n <', 5]), 4.9), valid)
+  t.deepEqual(validateNumber(number([0, '<= n <=', 5]), 0), valid)
+  t.deepEqual(validateNumber(number([0, '<= n <=', 5]), 5), valid)
+  t.deepEqual(validateNumber(number([-Infinity, '<= n <=', Infinity]), -Infinity), valid)
+  t.deepEqual(validateNumber(number([-Infinity, '<= n <=', Infinity]), Infinity), valid)
+  t.deepEqual(validateNumber(number([0, '< n <', 5], [15, '< n <', 20]), 16), valid)
 })
 
-test('validateNumberRange unexpectedTypeOf', (t) => {
-  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), 'hello'), unexpectedTypeOf('number', 'hello'))
-  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), '0'), unexpectedTypeOf('number', '0'))
-  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), null), unexpectedTypeOf('number', null))
-  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), undefined), unexpectedTypeOf('number', undefined))
+test('validateNumber unexpectedTypeOf', (t) => {
+  t.deepEqual(validateNumber(number(), 'hello'), unexpectedTypeOf('number', 'hello'))
+  t.deepEqual(validateNumber(number(), '0'), unexpectedTypeOf('number', '0'))
+  t.deepEqual(validateNumber(number(), null), unexpectedTypeOf('number', null))
+  t.deepEqual(validateNumber(number(), undefined), unexpectedTypeOf('number', undefined))
 })
 
-test('validateNumberRange notInNumberRange', (t) => {
-  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), 0), notInNumberRange([0, '< n <', 5], 0))
-  t.deepEqual(validateNumberRange(numberRange([0, '< n <', 5]), 5), notInNumberRange([0, '< n <', 5], 5))
-  t.deepEqual(validateNumberRange(numberRange([0, '<= n <=', 5]), -0.001), notInNumberRange([0, '<= n <=', 5], -0.001))
-  t.deepEqual(validateNumberRange(numberRange([0, '<= n <=', 5]), 5.1), notInNumberRange([0, '<= n <=', 5], 5.1))
+test('validateNumber notInNumberRanges', (t) => {
+  t.deepEqual(validateNumber(number([0, '< n <', 5]), 0), notInNumberRanges([[0, '< n <', 5]], 0))
+  t.deepEqual(validateNumber(number([0, '< n <', 5]), 5), notInNumberRanges([[0, '< n <', 5]], 5))
+  t.deepEqual(validateNumber(number([0, '<= n <=', 5]), -0.001), notInNumberRanges([[0, '<= n <=', 5]], -0.001))
+  t.deepEqual(validateNumber(number([0, '<= n <=', 5]), 5.1), notInNumberRanges([[0, '<= n <=', 5]], 5.1))
   t.deepEqual(
-    validateNumberRange(numberRange([-Infinity, '< n <', Infinity]), -Infinity),
-    notInNumberRange([-Infinity, '< n <', Infinity], -Infinity)
+    validateNumber(number([-Infinity, '< n <', Infinity]), -Infinity),
+    notInNumberRanges([[-Infinity, '< n <', Infinity]], -Infinity)
   )
   t.deepEqual(
-    validateNumberRange(numberRange([-Infinity, '< n <', Infinity]), Infinity),
-    notInNumberRange([-Infinity, '< n <', Infinity], Infinity)
+    validateNumber(number([-Infinity, '< n <', Infinity]), Infinity),
+    notInNumberRanges([[-Infinity, '< n <', Infinity]], Infinity)
   )
+  t.deepEqual(validateNumber(number([0, '< n <', 5], [10, '< n <', 15]), 0), notInNumberRanges([[0, '< n <', 5], [10, '< n <', 15]], 0))
 })
 
 test('validateInteger valid', (t) => {

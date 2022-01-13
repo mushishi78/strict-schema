@@ -10,7 +10,7 @@ import {
   fields,
   instanceOf,
   integer,
-  numberRange,
+  number,
   or,
   indexedReference,
   stringRange,
@@ -27,7 +27,7 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = numberRange([34, '< n <', 0])
+  const claim = number([34, '< n <', 0])
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = number
   assert<Equals<Actual, Expected>>()
