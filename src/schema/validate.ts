@@ -25,7 +25,6 @@ import {
   BrandClaim,
   InstanceOfClaim,
   OrClaim,
-  NotClaim,
   Field,
   FieldReference,
 } from './claims'
@@ -70,7 +69,6 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [BrandClaim<any>] ? Valid : // TODO
   [C] extends [InstanceOfClaim<any>] ? Valid : // TODO
   [C] extends [OrClaim<any>] ? Valid : // TODO
-  [C] extends [NotClaim<any>] ? Valid : // TODO
   TypeError<['ClaimValidation', 'unrecognized claim', C]>
 
 // prettier-ignore

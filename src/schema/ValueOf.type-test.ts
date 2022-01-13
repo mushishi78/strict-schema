@@ -10,7 +10,6 @@ import {
   fields,
   instanceOf,
   integer,
-  not,
   numberRange,
   or,
   indexedReference,
@@ -87,13 +86,6 @@ type FileBrand = { readonly __brand: unique symbol }
   type Expected = number | boolean
   assert<Equals<Actual, Expected>>()
 }
-{
-  const claim = not(numberRange([0, '< n <', 100]))
-  type Actual = ValueOfClaim<typeof claim, {}>
-  type Expected = number
-  assert<Equals<Actual, Expected>>()
-}
-
 {
   //prettier-ignore
   const claim = fields(

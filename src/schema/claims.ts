@@ -14,7 +14,6 @@ export type Claim =
   | BrandClaim<any>
   | InstanceOfClaim<any>
   | OrClaim<any>
-  | NotClaim<any>
 
 export type IndexedClaim = Claim | IndexedReference<any>
 
@@ -85,7 +84,3 @@ export const isInstanceOfClaim = (claim: unknown): claim is InstanceOfClaim<any>
 export type OrClaim<Cs extends Claim[]> = { or: Cs }
 export const or = <Cs extends Claim[]>(...or: Cs): OrClaim<Cs> => ({ or })
 export const isOrClaim = (claim: unknown): claim is OrClaim<any> => isObject(claim) && 'or' in claim
-
-export type NotClaim<C extends Claim> = { not: C }
-export const not = <C extends Claim>(not: C): NotClaim<C> => ({ not })
-export const isNotClaim = (claim: unknown): claim is NotClaim<any> => isObject(claim) && 'not' in claim

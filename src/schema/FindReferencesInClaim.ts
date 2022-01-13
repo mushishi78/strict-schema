@@ -12,7 +12,6 @@ import {
   BrandClaim,
   InstanceOfClaim,
   OrClaim,
-  NotClaim,
   IndexedReference,
   IndexedClaim,
   Field,
@@ -45,7 +44,6 @@ export type FindReferencesInClaim<C extends Claim> =
   [C] extends [BrandClaim<any>] ? [] :
   [C] extends [InstanceOfClaim<any>] ? [] :
   [C] extends [OrClaim<infer Cs>] ? FindReferencesInTuple<Cs> :
-  [C] extends [NotClaim<infer C>] ? FindReferencesInClaim<C> :
   [TypeError<['FindReferencesInClaim', 'Unrecognized claim', C]>]
 
 // prettier-ignore

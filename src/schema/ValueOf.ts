@@ -15,7 +15,6 @@ import {
   BrandClaim,
   InstanceOfClaim,
   OrClaim,
-  NotClaim,
   IndexedReference,
   IndexedClaim,
   Field,
@@ -39,7 +38,6 @@ type _ValueOfClaim<C extends Claim, Refs extends References> =
   C extends BrandClaim<infer Brand> ? Brand :
   C extends InstanceOfClaim<infer Constructor> ? InstanceType<Constructor> :
   C extends OrClaim<infer Cs> ? _ValueOfClaim<Cs[number], Refs> :
-  C extends NotClaim<infer C> ? _ValueOfClaim<C, Refs> :
   TypeError<['ValueOfClaim', 'Unrecognized claim', C]>
 
 // prettier-ignore
