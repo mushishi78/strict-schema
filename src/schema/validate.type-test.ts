@@ -41,9 +41,9 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = integer
+  const claim = integer()
   type Actual = ClaimValidation<typeof claim, {}>
-  type Expected = Valid | UnexpectedTypeOf | NotInteger
+  type Expected = Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger
   assert<Equals<Actual, Expected>>()
 }
 {
@@ -65,18 +65,19 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = array(array(integer))
+  const claim = array(array(integer()))
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected =
     | Valid
     | UnexpectedTypeOf
-    | IndexedValidations<(Valid | UnexpectedTypeOf | IndexedValidations<(Valid | UnexpectedTypeOf | NotInteger)[]>)[]>
+    | IndexedValidations<(Valid | UnexpectedTypeOf | IndexedValidations<(Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger)[]>)[]>
   assert<Equals<Actual, Expected>>()
 }
 {
   const claim = array(indexedReference('num'))
-  type Actual = ClaimValidation<typeof claim, { num: 'Integer' }>
-  type Expected = Valid | UnexpectedTypeOf | IndexedValidations<(Valid | UnexpectedTypeOf | NotInteger)[]>
+  const lookup = { num: integer() }
+  type Actual = ClaimValidation<typeof claim, typeof lookup>
+  type Expected = Valid | UnexpectedTypeOf | IndexedValidations<(Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger)[]>
   assert<Equals<Actual, Expected>>()
 }
 {
@@ -86,61 +87,63 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(constant(256), integer)
+  const claim = tuple(constant(256), integer())
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected =
     | Valid
     | UnexpectedTypeOf
     | UnexpectedLength
-    | IndexedValidations<[Valid | NotConstant<256>, Valid | UnexpectedTypeOf | NotInteger]>
+    | IndexedValidations<[Valid | NotConstant<256>, Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger]>
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(tuple(integer))
+  const claim = tuple(tuple(integer()))
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected =
     | Valid
     | UnexpectedTypeOf
     | UnexpectedLength
     | IndexedValidations<
-        [Valid | UnexpectedTypeOf | UnexpectedLength | IndexedValidations<[Valid | UnexpectedTypeOf | NotInteger]>]
+        [Valid | UnexpectedTypeOf | UnexpectedLength | IndexedValidations<[Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger]>]
       >
   assert<Equals<Actual, Expected>>()
 }
 {
   const claim = tuple(indexedReference('num'))
-  type Actual = ClaimValidation<typeof claim, { num: 'Integer' }>
+  const lookup = { num: integer() }
+  type Actual = ClaimValidation<typeof claim, typeof lookup>
   type Expected =
     | Valid
     | UnexpectedTypeOf
     | UnexpectedLength
-    | IndexedValidations<[Valid | UnexpectedTypeOf | NotInteger]>
+    | IndexedValidations<[Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger]>
   assert<Equals<Actual, Expected>>()
 }
 {
   const claim = tuple(constant(0), indexedReference('num'))
-  type Actual = ClaimValidation<typeof claim, { num: 'Integer' }>
+  const lookup = { num: integer() }
+  type Actual = ClaimValidation<typeof claim, typeof lookup>
   type Expected =
     | Valid
     | UnexpectedTypeOf
     | UnexpectedLength
-    | IndexedValidations<[Valid | NotConstant<0>, Valid | UnexpectedTypeOf | NotInteger]>
+    | IndexedValidations<[Valid | NotConstant<0>, Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger]>
   assert<Equals<Actual, Expected>>()
 }
 {
-  const validation = validateClaim(tuple(boolean, integer), [true, 34], {})
+  const validation = validateClaim(tuple(boolean, integer()), [true, 34], {})
   if (validation.validationType === 'IndexedValidations') {
     const [v0, v1] = validation.validations
     if (!isValid(v0)) {
       assert<Equals<typeof v0, UnexpectedTypeOf>>()
     }
     if (!isValid(v1)) {
-      assert<Equals<typeof v1, UnexpectedTypeOf | NotInteger>>()
+      assert<Equals<typeof v1, UnexpectedTypeOf |  NotInNumberRanges | NotInteger>>()
     }
   }
 }
 {
-  const claim = fields(field('a', integer), field('b', boolean))
+  const claim = fields(field('a', integer()), field('b', boolean))
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected =
     | Valid
@@ -150,7 +153,7 @@ import {
 }
 {
   const claim = fields(fieldReference('a', 'num'), field('b', boolean))
-  const lookup = { num: integer }
+  const lookup = { num: integer() }
   type Actual = ClaimValidation<typeof claim, typeof lookup>
   type Expected =
     | Valid
@@ -159,7 +162,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(field('a?', integer), field('b', boolean))
+  const claim = fields(field('a?', integer()), field('b', boolean))
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected =
     | Valid
@@ -169,7 +172,7 @@ import {
 }
 {
   const claim = fields(fieldReference('a?', 'num'), field('b', boolean))
-  const lookup = { num: integer }
+  const lookup = { num: integer() }
   type Actual = ClaimValidation<typeof claim, typeof lookup>
   type Expected =
     | Valid
@@ -178,12 +181,12 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(field('a?', integer), field('b', boolean))
+  const claim = fields(field('a?', integer()), field('b', boolean))
   const validation = validateClaim(claim, { a: 234.5 }, {})
   if (validation.validationType === 'KeyedValidations') {
     const { a, b } = validation.validations
     if (!isValid(a)) {
-      assert<Equals<typeof a, UnexpectedTypeOf | NotInteger>>()
+      assert<Equals<typeof a, UnexpectedTypeOf |  NotInNumberRanges | NotInteger>>()
     }
     if (!isValid(b)) {
       assert<Equals<typeof b, UnexpectedTypeOf | Missing>>()

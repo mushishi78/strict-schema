@@ -33,7 +33,7 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = integer
+  const claim = integer([34, '< n <', 0])
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = number
   assert<Equals<Actual, Expected>>()
@@ -57,13 +57,13 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(boolean, integer)
+  const claim = tuple(boolean, integer())
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = [boolean, number]
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(field('foo', integer), field('bar?', boolean))
+  const claim = fields(field('foo', integer()), field('bar?', boolean))
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = { foo: number; bar?: boolean }
   assert<Equals<Actual, Expected>>()
@@ -81,7 +81,7 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = or(integer, boolean)
+  const claim = or(integer(), boolean)
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = number | boolean
   assert<Equals<Actual, Expected>>()
@@ -89,10 +89,10 @@ type FileBrand = { readonly __brand: unique symbol }
 {
   //prettier-ignore
   const claim = fields(
-    field('foo', integer),
+    field('foo', integer()),
     field('bar?', boolean),
     field('nested', fields(
-      field('chew', or(integer, boolean)),
+      field('chew', or(integer(), boolean)),
       field('lick?', constant(null))
     )))
 
@@ -108,7 +108,7 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(integer, indexedReference('node'))
+  const claim = tuple(integer(), indexedReference('node'))
   interface IActual extends Actual {}
   type Actual = ValueOfClaim<typeof claim, { node: IActual }>
   type Expected = [number, Expected]
@@ -126,7 +126,7 @@ type FileBrand = { readonly __brand: unique symbol }
   const claim = fields(
     field('relations', fields(
       fieldReference('child?', 'childRef'),
-      field('count', integer))))
+      field('count', integer()))))
 
   interface IActual {
     child?: Actual

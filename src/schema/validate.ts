@@ -84,7 +84,7 @@ type _ClaimForIndexedClaim<C extends IndexedClaim, RL extends ReferenceLookup> =
 
 export type ConstantValidation<Constant extends ContantTypes> = Valid | NotConstant<Constant>
 export type NumberValidation = Valid | UnexpectedTypeOf | NotInNumberRanges
-export type IntegerValidation = Valid | UnexpectedTypeOf | NotInteger
+export type IntegerValidation = Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger
 export type StringRangeValidation = Valid | UnexpectedTypeOf | NotInStringRange
 export type BooleanValidation = Valid | UnexpectedTypeOf
 
@@ -172,8 +172,10 @@ export function validateNumber(claim: NumberClaim, value: unknown): NumberValida
   return valid
 }
 
-export function validateInteger(_: IntegerClaim, value: unknown): IntegerValidation {
+export function validateInteger(claim: IntegerClaim, value: unknown): IntegerValidation {
+  const ranges = claim.integerRanges
   if (typeof value !== 'number') return unexpectedTypeOf('number', value)
+  if (ranges.length > 0 && !isInNumberRanges(ranges, value)) return notInNumberRanges(ranges, value)
   return Number.isInteger(value) ? valid : notInteger(value)
 }
 

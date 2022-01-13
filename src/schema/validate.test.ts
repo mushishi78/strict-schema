@@ -105,22 +105,22 @@ test('validateNumber notInNumberRanges', (t) => {
 })
 
 test('validateInteger valid', (t) => {
-  t.deepEqual(validateInteger(integer, 1), valid)
-  t.deepEqual(validateInteger(integer, -100), valid)
-  t.deepEqual(validateInteger(integer, 1438384), valid)
+  t.deepEqual(validateInteger(integer(), 1), valid)
+  t.deepEqual(validateInteger(integer(), -100), valid)
+  t.deepEqual(validateInteger(integer(), 1438384), valid)
 })
 
 test('validateInteger unexpectedTypeOf', (t) => {
-  t.deepEqual(validateInteger(integer, 'hello'), unexpectedTypeOf('number', 'hello'))
-  t.deepEqual(validateInteger(integer, '0'), unexpectedTypeOf('number', '0'))
-  t.deepEqual(validateInteger(integer, null), unexpectedTypeOf('number', null))
-  t.deepEqual(validateInteger(integer, undefined), unexpectedTypeOf('number', undefined))
+  t.deepEqual(validateInteger(integer(), 'hello'), unexpectedTypeOf('number', 'hello'))
+  t.deepEqual(validateInteger(integer(), '0'), unexpectedTypeOf('number', '0'))
+  t.deepEqual(validateInteger(integer(), null), unexpectedTypeOf('number', null))
+  t.deepEqual(validateInteger(integer(), undefined), unexpectedTypeOf('number', undefined))
 })
 
 test('validateInteger notInteger', (t) => {
-  t.deepEqual(validateInteger(integer, 0.000001), notInteger(0.000001))
-  t.deepEqual(validateInteger(integer, 0 / 0), notInteger(0 / 0))
-  t.deepEqual(validateInteger(integer, Infinity), notInteger(Infinity))
+  t.deepEqual(validateInteger(integer(), 0.000001), notInteger(0.000001))
+  t.deepEqual(validateInteger(integer(), 0 / 0), notInteger(0 / 0))
+  t.deepEqual(validateInteger(integer(), Infinity), notInteger(Infinity))
 })
 
 test('validateStringRange valid', (t) => {
@@ -154,10 +154,10 @@ test('validateBoolean unexpectedTypeOf', (t) => {
 })
 
 test('validateArray valid', (t) => {
-  t.deepEqual(validateArray(array(integer), [1, 2, 34, 56, 1, 2], {}), valid)
+  t.deepEqual(validateArray(array(integer()), [1, 2, 34, 56, 1, 2], {}), valid)
   t.deepEqual(
     validateArray(
-      array(array(integer)),
+      array(array(integer())),
       [
         [1, 2],
         [34, 56, 1, 2],
@@ -171,101 +171,101 @@ test('validateArray valid', (t) => {
 })
 
 test('validateArray unexpectedTypeOf', (t) => {
-  t.deepEqual(validateArray(array(integer), 0, {}), unexpectedTypeOf('array', 0))
-  t.deepEqual(validateArray(array(integer), 'true', {}), unexpectedTypeOf('array', 'true'))
-  t.deepEqual(validateArray(array(integer), null, {}), unexpectedTypeOf('array', null))
-  t.deepEqual(validateArray(array(integer), undefined, {}), unexpectedTypeOf('array', undefined))
+  t.deepEqual(validateArray(array(integer()), 0, {}), unexpectedTypeOf('array', 0))
+  t.deepEqual(validateArray(array(integer()), 'true', {}), unexpectedTypeOf('array', 'true'))
+  t.deepEqual(validateArray(array(integer()), null, {}), unexpectedTypeOf('array', null))
+  t.deepEqual(validateArray(array(integer()), undefined, {}), unexpectedTypeOf('array', undefined))
 })
 
 test('validateArray indexedValidations', (t) => {
   t.deepEqual(
-    validateArray(array(integer), [1, 2, 34.67, 56], {}),
+    validateArray(array(integer()), [1, 2, 34.67, 56], {}),
     indexedValidations(valid, valid, notInteger(34.67), valid)
   )
   t.deepEqual(
-    validateArray(array(integer), [1, '2', 34.67, 56], {}),
+    validateArray(array(integer()), [1, '2', 34.67, 56], {}),
     indexedValidations(valid, unexpectedTypeOf('number', '2'), notInteger(34.67), valid)
   )
   t.deepEqual(
-    validateArray(array(array(integer)), [[1, 4], ['2']], {}),
+    validateArray(array(array(integer())), [[1, 4], ['2']], {}),
     indexedValidations(valid, indexedValidations(unexpectedTypeOf('number', '2')))
   )
 })
 
 test('validateArray indexedReference', (t) => {
-  t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34, 56, 1, 2], { num: integer }), valid)
-  t.deepEqual(validateArray(array(indexedReference('num')), 0, { num: integer }), unexpectedTypeOf('array', 0))
+  t.deepEqual(validateArray(array(indexedReference('num')), [1, 2, 34, 56, 1, 2], { num: integer() }), valid)
+  t.deepEqual(validateArray(array(indexedReference('num')), 0, { num: integer() }), unexpectedTypeOf('array', 0))
   t.deepEqual(
-    validateArray(array(indexedReference('num')), [1, 2, 34.67, 56], { num: integer }),
+    validateArray(array(indexedReference('num')), [1, 2, 34.67, 56], { num: integer() }),
     indexedValidations(valid, valid, notInteger(34.67), valid)
   )
   t.throws(() => validateArray(array(indexedReference('missing')), [1, 2, 34, 56, 1, 2], {}))
 })
 
 test('validateTuple valid', (t) => {
-  t.deepEqual(validateTuple(tuple(integer), [1], {}), valid)
-  t.deepEqual(validateTuple(tuple(integer, boolean), [1, false], {}), valid)
-  t.deepEqual(validateTuple(tuple(tuple(integer, boolean)), [[1, true]], {}), valid)
+  t.deepEqual(validateTuple(tuple(integer()), [1], {}), valid)
+  t.deepEqual(validateTuple(tuple(integer(), boolean), [1, false], {}), valid)
+  t.deepEqual(validateTuple(tuple(tuple(integer(), boolean)), [[1, true]], {}), valid)
   t.deepEqual(validateTuple(tuple(constant(0), boolean), [0, false], {}), valid)
-  t.deepEqual(validateTuple(tuple(integer, boolean, constant(null)), [25, false, null], {}), valid)
+  t.deepEqual(validateTuple(tuple(integer(), boolean, constant(null)), [25, false, null], {}), valid)
 })
 
 test('validateTuple unexpectedTypeOf', (t) => {
-  t.deepEqual(validateTuple(tuple(integer), 0, {}), unexpectedTypeOf('array', 0))
-  t.deepEqual(validateTuple(tuple(integer), 'true', {}), unexpectedTypeOf('array', 'true'))
-  t.deepEqual(validateTuple(tuple(integer), null, {}), unexpectedTypeOf('array', null))
-  t.deepEqual(validateTuple(tuple(integer), undefined, {}), unexpectedTypeOf('array', undefined))
+  t.deepEqual(validateTuple(tuple(integer()), 0, {}), unexpectedTypeOf('array', 0))
+  t.deepEqual(validateTuple(tuple(integer()), 'true', {}), unexpectedTypeOf('array', 'true'))
+  t.deepEqual(validateTuple(tuple(integer()), null, {}), unexpectedTypeOf('array', null))
+  t.deepEqual(validateTuple(tuple(integer()), undefined, {}), unexpectedTypeOf('array', undefined))
 })
 
 test('validateTuple unexpectedLength', (t) => {
-  t.deepEqual(validateTuple(tuple(integer), [], {}), unexpectedLength(1, []))
-  t.deepEqual(validateTuple(tuple(integer), [1, 2], {}), unexpectedLength(1, [1, 2]))
-  t.deepEqual(validateTuple(tuple(integer, boolean, integer), [1, false], {}), unexpectedLength(3, [1, false]))
-  t.deepEqual(validateTuple(tuple(tuple(integer)), [[0], [1]], {}), unexpectedLength(1, [[0], [1]]))
+  t.deepEqual(validateTuple(tuple(integer()), [], {}), unexpectedLength(1, []))
+  t.deepEqual(validateTuple(tuple(integer()), [1, 2], {}), unexpectedLength(1, [1, 2]))
+  t.deepEqual(validateTuple(tuple(integer(), boolean, integer()), [1, false], {}), unexpectedLength(3, [1, false]))
+  t.deepEqual(validateTuple(tuple(tuple(integer())), [[0], [1]], {}), unexpectedLength(1, [[0], [1]]))
 })
 
 test('validateTuple indexedValidations', (t) => {
-  t.deepEqual(validateTuple(tuple(integer), [0.23], {}), indexedValidations(notInteger(0.23)))
+  t.deepEqual(validateTuple(tuple(integer()), [0.23], {}), indexedValidations(notInteger(0.23)))
   t.deepEqual(
-    validateTuple(tuple(integer, boolean, integer), [1, 1, 1], {}),
+    validateTuple(tuple(integer(), boolean, integer()), [1, 1, 1], {}),
     indexedValidations(valid, unexpectedTypeOf('boolean', 1), valid)
   )
   t.deepEqual(
-    validateTuple(tuple(tuple(integer), tuple(boolean)), [[1], ['2']], {}),
+    validateTuple(tuple(tuple(integer()), tuple(boolean)), [[1], ['2']], {}),
     indexedValidations(valid, indexedValidations(unexpectedTypeOf('boolean', '2')))
   )
 })
 
 test('validateTuple indexedReference', (t) => {
-  t.deepEqual(validateTuple(tuple(indexedReference('num')), [1], { num: integer }), valid)
+  t.deepEqual(validateTuple(tuple(indexedReference('num')), [1], { num: integer() }), valid)
   t.deepEqual(
-    validateTuple(tuple(boolean, indexedReference('num')), [true, 0.23], { num: integer }),
+    validateTuple(tuple(boolean, indexedReference('num')), [true, 0.23], { num: integer() }),
     indexedValidations(valid, notInteger(0.23))
   )
   t.throws(() => validateTuple(tuple(indexedReference('missing')), [1], {}))
 })
 
 test('validateFields valid', (t) => {
-  t.deepEqual(validateFields(fields(field('a', integer)), { a: 23 }, {}), valid)
-  t.deepEqual(validateFields(fields(field('a', integer), field('b?', boolean)), { a: 23 }, {}), valid)
-  t.deepEqual(validateFields(fields(field('a', integer), field('b?', boolean)), { a: 23, b: false }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer())), { a: 23 }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer()), field('b?', boolean)), { a: 23 }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer()), field('b?', boolean)), { a: 23, b: false }, {}), valid)
   t.deepEqual(validateFields(fields(fieldReference('a', 'n')), { a: true }, { n: boolean }), valid)
   t.deepEqual(validateFields(fields(fieldReference('a?', 'n')), { a: true }, { n: boolean }), valid)
   t.deepEqual(validateFields(fields(fieldReference('a?', 'n')), {}, { n: boolean }), valid)
-  t.deepEqual(validateFields(fields(field('a', integer)), { a: 23, b: 34 }, {}), valid)
-  t.deepEqual(validateFields(fields(field('a', integer)), { a: 23, b: { c: 'Hello' } }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer())), { a: 23, b: 34 }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer())), { a: 23, b: { c: 'Hello' } }, {}), valid)
 })
 
 test('validateFields unexpectedTypeOf', (t) => {
-  t.deepEqual(validateFields(fields(field('a', integer)), 23, {}), unexpectedTypeOf('object', 23))
-  t.deepEqual(validateFields(fields(field('a', integer)), [23], {}), unexpectedTypeOf('object', [23]))
-  t.deepEqual(validateFields(fields(field('a', integer)), [{ a: 23 }], {}), unexpectedTypeOf('object', [{ a: 23 }]))
+  t.deepEqual(validateFields(fields(field('a', integer())), 23, {}), unexpectedTypeOf('object', 23))
+  t.deepEqual(validateFields(fields(field('a', integer())), [23], {}), unexpectedTypeOf('object', [23]))
+  t.deepEqual(validateFields(fields(field('a', integer())), [{ a: 23 }], {}), unexpectedTypeOf('object', [{ a: 23 }]))
 })
 
 test('validateFields missing', (t) => {
-  t.deepEqual(validateFields(fields(field('a', integer)), { b: 23 }, {}), keyedValidations({ a: missing }, ['b']))
+  t.deepEqual(validateFields(fields(field('a', integer())), { b: 23 }, {}), keyedValidations({ a: missing }, ['b']))
   t.deepEqual(
-    validateFields(fields(field('a', integer), field('b?', boolean)), { b: false }, {}),
+    validateFields(fields(field('a', integer()), field('b?', boolean)), { b: false }, {}),
     keyedValidations({ a: missing, b: valid }, [])
   )
   t.deepEqual(
@@ -276,22 +276,22 @@ test('validateFields missing', (t) => {
 
 test('validateFields unexpectedKeys', (t) => {
   t.deepEqual(
-    validateFields(exclusiveFields(field('a', integer)), { a: 23, b: 'void' }, {}),
+    validateFields(exclusiveFields(field('a', integer())), { a: 23, b: 'void' }, {}),
     keyedValidations({ a: valid }, ['b'])
   )
 })
 
 test('validateFields keyedValidations', (t) => {
   t.deepEqual(
-    validateFields(fields(field('a', integer)), { a: 23.5 }, {}),
+    validateFields(fields(field('a', integer())), { a: 23.5 }, {}),
     keyedValidations({ a: notInteger(23.5) }, [])
   )
 })
 
 test('validateFields fieldReference', (t) => {
   t.deepEqual(
-    validateFields(fields(fieldReference('a', 'n')), { a: 23.5 }, { n: integer }),
+    validateFields(fields(fieldReference('a', 'n')), { a: 23.5 }, { n: integer() }),
     keyedValidations({ a: notInteger(23.5) }, [])
   )
-  t.deepEqual(validateFields(fields(fieldReference('a', 'n')), { a: 23 }, { n: integer }), valid)
+  t.deepEqual(validateFields(fields(fieldReference('a', 'n')), { a: 23 }, { n: integer() }), valid)
 })

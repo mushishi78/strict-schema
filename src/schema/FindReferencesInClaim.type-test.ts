@@ -32,7 +32,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = integer
+  const claim = integer()
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = []
   assert<Equals<Actual, Expected>>()
@@ -68,31 +68,31 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(integer, integer)
+  const claim = tuple(integer(), integer())
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = []
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(integer, indexedReference('node'))
+  const claim = tuple(integer(), indexedReference('node'))
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = [IndexedReference<'node'>]
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(indexedReference('node'), integer, indexedReference('pilot'))
+  const claim = tuple(indexedReference('node'), integer(), indexedReference('pilot'))
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = [IndexedReference<'node'>, IndexedReference<'pilot'>]
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(fieldReference('a', 'node'), field('b', integer))
+  const claim = fields(fieldReference('a', 'node'), field('b', integer()))
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = [FieldReference<'a', 'node'>]
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(field('a', integer), fieldReference('b', 'pilot'))
+  const claim = fields(field('a', integer()), fieldReference('b', 'pilot'))
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = [FieldReference<'b', 'pilot'>]
   assert<Equals<Actual, Expected>>()
@@ -100,7 +100,7 @@ import {
 {
   // prettier-ignore
   const claim = fields(
-    field('a', integer),
+    field('a', integer()),
     field('b', fields(
       field('bi', stringRange([0, 10])),
       fieldReference('bii?', 'node'))
@@ -111,25 +111,25 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(integer, integer)
+  const claim = tuple(integer(), integer())
   type Actual = ReferenceLookup<typeof claim>
   type Expected = {}
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(integer, indexedReference('node'))
+  const claim = tuple(integer(), indexedReference('node'))
   type Actual = ReferenceLookup<typeof claim>
   type Expected = { node: any }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = tuple(indexedReference('node'), integer, indexedReference('pilot'))
+  const claim = tuple(indexedReference('node'), integer(), indexedReference('pilot'))
   type Actual = ReferenceLookup<typeof claim>
   type Expected = { node: any; pilot: any }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(fieldReference('a', 'node'), field('b', integer), fieldReference('b?', 'pilot'))
+  const claim = fields(fieldReference('a', 'node'), field('b', integer()), fieldReference('b?', 'pilot'))
   type Actual = ReferenceLookup<typeof claim>
   type Expected = { node: { a: any }; pilot: { b?: any } }
   assert<Equals<Actual, Expected>>()

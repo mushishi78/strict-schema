@@ -27,9 +27,9 @@ export type NumberClaim = { numberRanges: NumberRange[] }
 export const number = (...numberRanges: NumberRange[]): NumberClaim => ({ numberRanges })
 export const isNumberClaim = (claim: unknown): claim is NumberClaim => isObject(claim) && 'numberRanges' in claim
 
-export type IntegerClaim = 'Integer'
-export const integer: IntegerClaim = 'Integer'
-export const isIntegerClaim = (claim: unknown): claim is IntegerClaim => claim === 'Integer'
+export type IntegerClaim = { integerRanges: NumberRange[] }
+export const integer = (...integerRanges: NumberRange[]): IntegerClaim => ({ integerRanges })
+export const isIntegerClaim = (claim: unknown): claim is IntegerClaim => isObject(claim) && 'integerRanges' in claim
 
 export type StringRangeClaim = { stringRange: StringRange }
 export const stringRange = (stringRange: StringRange): StringRangeClaim => ({ stringRange })
