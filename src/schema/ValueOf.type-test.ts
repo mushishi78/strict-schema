@@ -69,9 +69,9 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = brand<FileBrand>()
+  const claim = brand<FileBrand>()(integer())
   type Actual = ValueOfClaim<typeof claim, {}>
-  type Expected = FileBrand
+  type Expected = FileBrand & number
   assert<Equals<Actual, Expected>>()
 }
 {

@@ -11,7 +11,7 @@ export type Claim =
   | ArrayClaim<any>
   | TupleClaim<any>
   | FieldsClaim<any>
-  | BrandClaim<any>
+  | BrandClaim<any, any>
   | InstanceOfClaim<any>
   | OrClaim<any>
 
@@ -68,9 +68,9 @@ export const exclusiveFields = <Fs extends Field[]>(...fields: Fs): FieldsClaim<
 })
 export const isFieldsClaim = (claim: unknown): claim is FieldsClaim<any> => isObject(claim) && 'fields' in claim
 
-export type BrandClaim<Brand = never> = { brand: true }
-export const brand = <Brand = never>(): BrandClaim<Brand> => ({ brand: true })
-export const isBrandClaim = (claim: unknown): claim is BrandClaim<any> => isObject(claim) && 'brand' in claim
+export type BrandClaim<Brand, C extends Claim> = { branded: C }
+export const brand = <Brand>() => <C extends Claim>(claim: C): BrandClaim<Brand, C> => ({ branded: claim })
+export const isBrandClaim = (claim: unknown): claim is BrandClaim<any, any> => isObject(claim) && 'branded' in claim
 
 type Constructor = new (...args: any) => any
 export type InstanceOfClaim<C extends Constructor = never> = { instanceOf: C }

@@ -50,7 +50,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = brand<{ __brand: 'piston' }>()
+  const claim = brand<{ __brand: 'piston' }>()(boolean)
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = []
   assert<Equals<Actual, Expected>>()

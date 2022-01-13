@@ -67,7 +67,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
   [C] extends [FieldsClaim<infer Fields>] ? FieldsValidation<Fields, RL> :
-  [C] extends [BrandClaim<any>] ? Valid : // TODO
+  [C] extends [BrandClaim<any, infer NestedClaim>] ? ClaimValidation<NestedClaim, RL> : // TODO
   [C] extends [InstanceOfClaim<any>] ? Valid : // TODO
   [C] extends [OrClaim<any>] ? Valid : // TODO
   TypeError<['ClaimValidation', 'unrecognized claim', C]>

@@ -35,7 +35,7 @@ type _ValueOfClaim<C extends Claim, Refs extends References> =
   C extends ArrayClaim<infer C2> ? Array<ValueOfIndexedClaim<C2, Refs>> :
   C extends TupleClaim<infer Cs> ? ValueOfTuple<Cs, Refs> :
   C extends FieldsClaim<infer Fields> ? Unite<ValueOfFields<Fields, Refs>> :
-  C extends BrandClaim<infer Brand> ? Brand :
+  C extends BrandClaim<infer Brand, infer C2> ? Brand & _ValueOfClaim<C2, Refs> :
   C extends InstanceOfClaim<infer Constructor> ? InstanceType<Constructor> :
   C extends OrClaim<infer Cs> ? _ValueOfClaim<Cs[number], Refs> :
   TypeError<['ValueOfClaim', 'Unrecognized claim', C]>
