@@ -27,6 +27,7 @@ import {
   OrClaim,
   Field,
   FieldReference,
+  isFieldsClaim,
 } from './claims'
 
 import {
@@ -135,6 +136,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
   if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
+  if (isFieldsClaim(claim)) return validateFields(claim, value, referenceLookup) as ClaimValidation<C, RL>
   throw new Error(`Unrecognied claim: ${claim}`)
 }
 
