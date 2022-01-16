@@ -12,7 +12,7 @@ import {
   integer,
   number,
   indexedReference,
-  stringRange,
+  string,
   tuple,
   fieldReference,
   IndexedReference,
@@ -38,7 +38,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = stringRange([0, 10])
+  const claim = string(0, 10)
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = []
   assert<Equals<Actual, Expected>>()
@@ -102,7 +102,7 @@ import {
   const claim = fields(
     field('a', integer()),
     field('b', fields(
-      field('bi', stringRange([0, 10])),
+      field('bi', string()),
       fieldReference('bii?', 'node'))
     )
   )

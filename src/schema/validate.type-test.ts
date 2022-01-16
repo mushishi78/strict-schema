@@ -10,7 +10,7 @@ import {
   indexedReference,
   integer,
   number,
-  stringRange,
+  string,
   tuple,
 } from './claims'
 
@@ -47,7 +47,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = stringRange([0, 10])
+  const claim = string(0, 10)
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected = Valid | UnexpectedTypeOf | NotInStringRange
   assert<Equals<Actual, Expected>>()

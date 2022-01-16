@@ -1,12 +1,11 @@
 import { isObject } from 'remeda'
 import { NumberRange } from '../lib/number-range'
-import { StringRange } from '../lib/string-range'
 
 export type Claim =
   | ConstantClaim<any>
   | NumberClaim
   | IntegerClaim
-  | StringRangeClaim
+  | StringClaim
   | BooleanClaim
   | ArrayClaim<any>
   | TupleClaim<any>
@@ -31,10 +30,9 @@ export type IntegerClaim = { integerRanges: NumberRange[] }
 export const integer = (...integerRanges: NumberRange[]): IntegerClaim => ({ integerRanges })
 export const isIntegerClaim = (claim: unknown): claim is IntegerClaim => isObject(claim) && 'integerRanges' in claim
 
-export type StringRangeClaim = { stringRange: StringRange }
-export const stringRange = (stringRange: StringRange): StringRangeClaim => ({ stringRange })
-export const isStringRangeClaim = (claim: unknown): claim is StringRangeClaim =>
-  isObject(claim) && 'stringRange' in claim
+export type StringClaim = { stringRange: [number, number] }
+export const string = (min = 0, max = Infinity): StringClaim => ({ stringRange: [min, max] })
+export const isStringClaim = (claim: unknown): claim is StringClaim => isObject(claim) && 'stringRange' in claim
 
 export type BooleanClaim = 'Boolean'
 export const boolean: BooleanClaim = 'Boolean'

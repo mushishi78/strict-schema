@@ -4,7 +4,7 @@ import {
   ConstantClaim,
   NumberClaim,
   IntegerClaim,
-  StringRangeClaim,
+  StringClaim,
   BooleanClaim,
   ArrayClaim,
   TupleClaim,
@@ -36,7 +36,7 @@ export type FindReferencesInClaim<C extends Claim> =
   [C] extends [ConstantClaim<any>] ? [] :
   [C] extends [NumberClaim] ? [] :
   [C] extends [IntegerClaim] ? [] :
-  [C] extends [StringRangeClaim] ? [] :
+  [C] extends [StringClaim] ? [] :
   [C] extends [BooleanClaim] ? [] :
   [C] extends [ArrayClaim<infer C2>] ? FindReferencesInIndexedClaim<C2> :
   [C] extends [TupleClaim<infer Cs>] ? FindReferencesInTuple<Cs> :

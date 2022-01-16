@@ -1,5 +1,4 @@
 import { NumberRange } from '../lib/number-range'
-import { StringRange } from '../lib/string-range'
 import { ContantTypes } from './claims'
 
 export type Validation = Valid | Failure
@@ -70,11 +69,11 @@ export const notInteger = (value: number): NotInteger => ({ validationType: 'Not
 
 export interface NotInStringRange {
   validationType: 'NotInStringRange'
-  stringRange: StringRange
+  stringRange: [number, number]
   value: string
 }
 
-export const notInStringRange = (stringRange: StringRange, value: string): NotInStringRange => ({
+export const notInStringRange = (stringRange: [number, number], value: string): NotInStringRange => ({
   validationType: 'NotInStringRange',
   stringRange,
   value,

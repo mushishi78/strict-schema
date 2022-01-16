@@ -13,7 +13,7 @@ import {
   number,
   or,
   indexedReference,
-  stringRange,
+  string,
   tuple,
   fieldReference,
 } from './claims'
@@ -39,7 +39,7 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = stringRange([0, 10])
+  const claim = string(0, 10)
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = string
   assert<Equals<Actual, Expected>>()

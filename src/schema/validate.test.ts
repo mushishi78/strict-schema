@@ -10,7 +10,7 @@ import {
   indexedReference,
   integer,
   number,
-  stringRange,
+  string,
   tuple,
 } from './claims'
 
@@ -21,7 +21,7 @@ import {
   validateFields,
   validateInteger,
   validateNumber,
-  validateStringRange,
+  validateString,
   validateTuple,
 } from './validate'
 
@@ -123,22 +123,25 @@ test('validateInteger notInteger', (t) => {
   t.deepEqual(validateInteger(integer(), Infinity), notInteger(Infinity))
 })
 
-test('validateStringRange valid', (t) => {
-  t.deepEqual(validateStringRange(stringRange([0, 5]), ''), valid)
-  t.deepEqual(validateStringRange(stringRange([0, 5]), 'Heya'), valid)
-  t.deepEqual(validateStringRange(stringRange([0, 5]), 'Hello'), valid)
+test('validateString valid', (t) => {
+  t.deepEqual(validateString(string(), ''), valid)
+  t.deepEqual(validateString(string(), 'Heya'), valid)
+  t.deepEqual(validateString(string(), 'Hello'), valid)
+  t.deepEqual(validateString(string(0, 5), ''), valid)
+  t.deepEqual(validateString(string(0, 5), 'Heya'), valid)
+  t.deepEqual(validateString(string(0, 5), 'Hello'), valid)
 })
 
-test('validateStringRange unexpectedTypeOf', (t) => {
-  t.deepEqual(validateStringRange(stringRange([0, 5]), 0), unexpectedTypeOf('string', 0))
-  t.deepEqual(validateStringRange(stringRange([0, 5]), true), unexpectedTypeOf('string', true))
-  t.deepEqual(validateStringRange(stringRange([0, 5]), null), unexpectedTypeOf('string', null))
-  t.deepEqual(validateStringRange(stringRange([0, 5]), undefined), unexpectedTypeOf('string', undefined))
+test('validateString unexpectedTypeOf', (t) => {
+  t.deepEqual(validateString(string(), 0), unexpectedTypeOf('string', 0))
+  t.deepEqual(validateString(string(), true), unexpectedTypeOf('string', true))
+  t.deepEqual(validateString(string(), null), unexpectedTypeOf('string', null))
+  t.deepEqual(validateString(string(), undefined), unexpectedTypeOf('string', undefined))
 })
 
-test('validateStringRange notInStringRange', (t) => {
-  t.deepEqual(validateStringRange(stringRange([1, 4]), ''), notInStringRange([1, 4], ''))
-  t.deepEqual(validateStringRange(stringRange([1, 4]), 'Hello'), notInStringRange([1, 4], 'Hello'))
+test('validateString notInStringRange', (t) => {
+  t.deepEqual(validateString(string(1, 4), ''), notInStringRange([1, 4], ''))
+  t.deepEqual(validateString(string(1, 4), 'Hello'), notInStringRange([1, 4], 'Hello'))
 })
 
 test('validateBoolean valid', (t) => {

@@ -7,7 +7,7 @@ import {
   ConstantClaim,
   NumberClaim,
   IntegerClaim,
-  StringRangeClaim,
+  StringClaim,
   BooleanClaim,
   ArrayClaim,
   TupleClaim,
@@ -30,7 +30,7 @@ type _ValueOfClaim<C extends Claim, Refs extends References> =
   C extends ConstantClaim<infer Constant> ? Constant :
   C extends NumberClaim ? number :
   C extends IntegerClaim ? number :
-  C extends StringRangeClaim ? string :
+  C extends StringClaim ? string :
   C extends BooleanClaim ? boolean :
   C extends ArrayClaim<infer C2> ? Array<ValueOfIndexedClaim<C2, Refs>> :
   C extends TupleClaim<infer Cs> ? ValueOfTuple<Cs, Refs> :

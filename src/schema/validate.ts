@@ -6,7 +6,7 @@ import {
   ConstantClaim,
   NumberClaim,
   IntegerClaim,
-  StringRangeClaim,
+  StringClaim,
   BooleanClaim,
   ArrayClaim,
   Claim,
@@ -15,7 +15,7 @@ import {
   isIntegerClaim,
   isBooleanClaim,
   isArrayClaim,
-  isStringRangeClaim,
+  isStringClaim,
   IndexedClaim,
   isIndexedReference,
   IndexedReference,
@@ -62,7 +62,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [ConstantClaim<infer Const>] ? ConstantValidation<Const> :
   [C] extends [NumberClaim] ? NumberValidation :
   [C] extends [IntegerClaim] ? IntegerValidation :
-  [C] extends [StringRangeClaim] ? StringRangeValidation :
+  [C] extends [StringClaim] ? StringRangeValidation :
   [C] extends [BooleanClaim] ? BooleanValidation :
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
@@ -132,7 +132,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isConstantClaim(claim)) return validateConstant(claim, value) as ClaimValidation<C, RL>
   if (isNumberClaim(claim)) return validateNumber(claim, value) as ClaimValidation<C, RL>
   if (isIntegerClaim(claim)) return validateInteger(claim, value) as ClaimValidation<C, RL>
-  if (isStringRangeClaim(claim)) return validateStringRange(claim, value) as ClaimValidation<C, RL>
+  if (isStringClaim(claim)) return validateString(claim, value) as ClaimValidation<C, RL>
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
   if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
@@ -179,7 +179,7 @@ export function validateInteger(claim: IntegerClaim, value: unknown): IntegerVal
   return Number.isInteger(value) ? valid : notInteger(value)
 }
 
-export function validateStringRange(claim: StringRangeClaim, value: unknown): StringRangeValidation {
+export function validateString(claim: StringClaim, value: unknown): StringRangeValidation {
   if (typeof value !== 'string') return unexpectedTypeOf('string', value)
   const [min, max] = claim.stringRange
   return min <= value.length && max >= value.length ? valid : notInStringRange(claim.stringRange, value)
