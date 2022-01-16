@@ -1,15 +1,15 @@
 {
-    "name": "strict-schema",
-    "private": true,
-    "scripts": {
-        "clean": "find ./dist -not -name 'package.json' -delete",
-        "prettier": "npx prettier -w src/"
-    },
-    "devDependencies": {
-        "ava": "^3.15.0",
-        "prettier": "^2.4.1",
-        "remeda": "^0.0.30",
-        "tsafe": "^0.8.1",
-        "typescript": "^4.4.4"
-    }
+  "name": "typerope",
+  "private": true,
+  "scripts": {
+    "clean": "find ./dist -not -name 'package.json' -delete",
+    "prettier": "npx prettier -w src/"
+  },
+  "devDependencies": {
+    "ava": "^3.15.0",
+    "prettier": "^2.4.1",
+    "remeda": "^0.0.30",
+    "tsafe": "^0.8.1",
+    "typescript": "^4.4.4"
+  }
 }
