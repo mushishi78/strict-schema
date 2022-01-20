@@ -21,21 +21,21 @@ export type ConstantClaim<T extends ContantTypes> = { constant: T }
 export const constant = <T extends ContantTypes>(constant: T): ConstantClaim<T> => ({ constant })
 export const isConstantClaim = hasField('constant')
 
-export type NumberClaim = { numberRanges: NumberRange[] }
-export const number = (...numberRanges: NumberRange[]): NumberClaim => ({ numberRanges })
-export const isNumberClaim = hasField('numberRanges')
+export type NumberClaim = { number: { ranges: NumberRange[] } }
+export const number = (...ranges: NumberRange[]): NumberClaim => ({ number: { ranges } })
+export const isNumberClaim = hasField('number')
 
-export type IntegerClaim = { integerRanges: NumberRange[] }
-export const integer = (...integerRanges: NumberRange[]): IntegerClaim => ({ integerRanges })
-export const isIntegerClaim = hasField('integerRanges')
+export type IntegerClaim = { integer: { ranges: NumberRange[] } }
+export const integer = (...ranges: NumberRange[]): IntegerClaim => ({ integer: { ranges } })
+export const isIntegerClaim = hasField('integer')
 
-export type StringClaim = { stringRange: [number, number] }
-export const string = (min = 0, max = Infinity): StringClaim => ({ stringRange: [min, max] })
-export const isStringClaim = hasField('stringRange')
+export type StringClaim = { string: { range: [number, number] } }
+export const string = (min = 0, max = Infinity): StringClaim => ({ string: { range: [min, max] } })
+export const isStringClaim = hasField('string')
 
-export type BooleanClaim = 'Boolean'
-export const boolean: BooleanClaim = 'Boolean'
-export const isBooleanClaim = (claim: unknown): claim is BooleanClaim => claim === 'Boolean'
+export type BooleanClaim = { boolean: true }
+export const boolean: BooleanClaim = { boolean: true }
+export const isBooleanClaim = hasField('boolean')
 
 export type ArrayClaim<C extends IndexedClaim> = { array: C }
 export const array = <C extends IndexedClaim>(claim: C): ArrayClaim<C> => ({ array: claim })

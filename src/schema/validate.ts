@@ -62,7 +62,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [ConstantClaim<infer Const>] ? ConstantValidation<Const> :
   [C] extends [NumberClaim] ? NumberValidation :
   [C] extends [IntegerClaim] ? IntegerValidation :
-  [C] extends [StringClaim] ? StringRangeValidation :
+  [C] extends [StringClaim] ? StringValidation :
   [C] extends [BooleanClaim] ? BooleanValidation :
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
@@ -85,7 +85,7 @@ type _ClaimForIndexedClaim<C extends IndexedClaim, RL extends ReferenceLookup> =
 export type ConstantValidation<Constant extends ContantTypes> = Valid | NotConstant<Constant>
 export type NumberValidation = Valid | UnexpectedTypeOf | NotInNumberRanges
 export type IntegerValidation = Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger
-export type StringRangeValidation = Valid | UnexpectedTypeOf | NotInStringRange
+export type StringValidation = Valid | UnexpectedTypeOf | NotInStringRange
 export type BooleanValidation = Valid | UnexpectedTypeOf
 
 export type ArrayValidation<C extends IndexedClaim, RL extends ReferenceLookup> =
@@ -166,23 +166,23 @@ export function validateConstant<Constant extends ContantTypes>(
 }
 
 export function validateNumber(claim: NumberClaim, value: unknown): NumberValidation {
-  const ranges = claim.numberRanges
+  const { ranges } = claim.number
   if (typeof value !== 'number') return unexpectedTypeOf('number', value)
   if (ranges.length > 0 && !isInNumberRanges(ranges, value)) return notInNumberRanges(ranges, value)
   return valid
 }
 
 export function validateInteger(claim: IntegerClaim, value: unknown): IntegerValidation {
-  const ranges = claim.integerRanges
+  const { ranges } = claim.integer
   if (typeof value !== 'number') return unexpectedTypeOf('number', value)
   if (ranges.length > 0 && !isInNumberRanges(ranges, value)) return notInNumberRanges(ranges, value)
   return Number.isInteger(value) ? valid : notInteger(value)
 }
 
-export function validateString(claim: StringClaim, value: unknown): StringRangeValidation {
+export function validateString(claim: StringClaim, value: unknown): StringValidation {
   if (typeof value !== 'string') return unexpectedTypeOf('string', value)
-  const [min, max] = claim.stringRange
-  return min <= value.length && max >= value.length ? valid : notInStringRange(claim.stringRange, value)
+  const [min, max] = claim.string.range
+  return min <= value.length && max >= value.length ? valid : notInStringRange(claim.string.range, value)
 }
 
 export function validateBoolean(_: BooleanClaim, value: unknown): BooleanValidation {
