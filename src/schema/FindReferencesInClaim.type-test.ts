@@ -17,6 +17,10 @@ import {
   fieldReference,
   IndexedReference,
   FieldReference,
+  uuid,
+  dateString,
+  unknown,
+  never,
 } from './claims'
 
 {
@@ -44,7 +48,31 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
+  const claim = uuid()
+  type Actual = FindReferencesInClaim<typeof claim>
+  type Expected = []
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = dateString()
+  type Actual = FindReferencesInClaim<typeof claim>
+  type Expected = []
+  assert<Equals<Actual, Expected>>()
+}
+{
   const claim = boolean
+  type Actual = FindReferencesInClaim<typeof claim>
+  type Expected = []
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = unknown
+  type Actual = FindReferencesInClaim<typeof claim>
+  type Expected = []
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = never
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = []
   assert<Equals<Actual, Expected>>()

@@ -19,6 +19,10 @@ import {
   IndexedClaim,
   Field,
   FieldReference,
+  UuidClaim,
+  DateStringClaim,
+  UnknownClaim,
+  NeverClaim,
 } from './claims'
 
 type References = Record<string, any>
@@ -31,7 +35,11 @@ type _ValueOfClaim<C extends Claim, Refs extends References> =
   C extends NumberClaim ? number :
   C extends IntegerClaim ? number :
   C extends StringClaim ? string :
+  C extends UuidClaim ? string :
+  C extends DateStringClaim ? string :
   C extends BooleanClaim ? boolean :
+  C extends UnknownClaim ? unknown :
+  C extends NeverClaim ? never :
   C extends ArrayClaim<infer C2> ? Array<ValueOfIndexedClaim<C2, Refs>> :
   C extends TupleClaim<infer Cs> ? ValueOfTuple<Cs, Refs> :
   C extends FieldsClaim<infer Fields> ? Unite<ValueOfFields<Fields, Refs>> :

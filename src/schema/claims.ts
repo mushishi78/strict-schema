@@ -6,7 +6,11 @@ export type Claim =
   | NumberClaim
   | IntegerClaim
   | StringClaim
+  | UuidClaim
+  | DateStringClaim
   | BooleanClaim
+  | UnknownClaim
+  | NeverClaim
   | ArrayClaim<any>
   | TupleClaim<any>
   | FieldsClaim<any>
@@ -33,9 +37,25 @@ export type StringClaim = { string: { range: [number, number] } }
 export const string = (min = 0, max = Infinity): StringClaim => ({ string: { range: [min, max] } })
 export const isStringClaim = hasField('string')
 
-export type BooleanClaim = { boolean: true }
-export const boolean: BooleanClaim = { boolean: true }
+export type UuidClaim = { uuid: {} }
+export const uuid = (): UuidClaim => ({ uuid: {} })
+export const isUuidClaim = hasField('uuid')
+
+export type DateStringClaim = { dateString: { format: 'rfc3339' | 'iso8601' } }
+export const dateString = (format: 'rfc3339' | 'iso8601' = 'rfc3339'): DateStringClaim => ({ dateString: { format } })
+export const isDateStringClaim = hasField('dateString')
+
+export type BooleanClaim = { boolean: {} }
+export const boolean: BooleanClaim = { boolean: {} }
 export const isBooleanClaim = hasField('boolean')
+
+export type UnknownClaim = { unknown: {} }
+export const unknown: UnknownClaim = { unknown: {} }
+export const isUnknownClaim = hasField('unknown')
+
+export type NeverClaim = { never: {} }
+export const never: NeverClaim = { never: {} }
+export const isNeverClaim = hasField('never')
 
 export type ArrayClaim<C extends IndexedClaim> = { array: C }
 export const array = <C extends IndexedClaim>(claim: C): ArrayClaim<C> => ({ array: claim })

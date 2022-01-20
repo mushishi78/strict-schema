@@ -16,6 +16,10 @@ import {
   string,
   tuple,
   fieldReference,
+  uuid,
+  dateString,
+  unknown,
+  never,
 } from './claims'
 
 type FileBrand = { readonly __brand: unique symbol }
@@ -45,9 +49,33 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
+  const claim = uuid()
+  type Actual = ValueOfClaim<typeof claim, {}>
+  type Expected = string
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = dateString()
+  type Actual = ValueOfClaim<typeof claim, {}>
+  type Expected = string
+  assert<Equals<Actual, Expected>>()
+}
+{
   const claim = boolean
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = boolean
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = unknown
+  type Actual = ValueOfClaim<typeof claim, {}>
+  type Expected = unknown
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = never
+  type Actual = ValueOfClaim<typeof claim, {}>
+  type Expected = never
   assert<Equals<Actual, Expected>>()
 }
 {

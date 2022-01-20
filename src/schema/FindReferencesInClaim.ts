@@ -16,6 +16,10 @@ import {
   IndexedClaim,
   Field,
   FieldReference,
+  UuidClaim,
+  DateStringClaim,
+  UnknownClaim,
+  NeverClaim,
 } from './claims'
 
 export type ReferenceLookup<C extends Claim> = LookupFromReferenceTuple<FindReferencesInClaim<C>>
@@ -37,7 +41,11 @@ export type FindReferencesInClaim<C extends Claim> =
   [C] extends [NumberClaim] ? [] :
   [C] extends [IntegerClaim] ? [] :
   [C] extends [StringClaim] ? [] :
+  [C] extends [UuidClaim] ? [] :
+  [C] extends [DateStringClaim] ? [] :
   [C] extends [BooleanClaim] ? [] :
+  [C] extends [UnknownClaim] ? [] :
+  [C] extends [NeverClaim] ? [] :
   [C] extends [ArrayClaim<infer C2>] ? FindReferencesInIndexedClaim<C2> :
   [C] extends [TupleClaim<infer Cs>] ? FindReferencesInTuple<Cs> :
   [C] extends [FieldsClaim<infer Fields>] ? FindReferencesInFields<Fields> :

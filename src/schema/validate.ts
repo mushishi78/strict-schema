@@ -28,6 +28,10 @@ import {
   Field,
   FieldReference,
   isFieldsClaim,
+  UuidClaim,
+  DateStringClaim,
+  UnknownClaim,
+  NeverClaim,
 } from './claims'
 
 import {
@@ -63,7 +67,11 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [NumberClaim] ? NumberValidation :
   [C] extends [IntegerClaim] ? IntegerValidation :
   [C] extends [StringClaim] ? StringValidation :
+  [C] extends [UuidClaim] ? Valid : // TODO
+  [C] extends [DateStringClaim] ? Valid : // TODO
   [C] extends [BooleanClaim] ? BooleanValidation :
+  [C] extends [UnknownClaim] ? Valid : // TODO
+  [C] extends [NeverClaim] ? Valid : // TODO
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
   [C] extends [FieldsClaim<infer Fields>] ? FieldsValidation<Fields, RL> :
