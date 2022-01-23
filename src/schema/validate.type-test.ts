@@ -10,6 +10,8 @@ import {
   indexedReference,
   integer,
   number,
+  optionalField,
+  optionalFieldReference,
   string,
   tuple,
 } from './claims'
@@ -162,7 +164,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(field('a?', integer()), field('b', boolean))
+  const claim = fields(optionalField('a', integer()), field('b', boolean))
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected =
     | Valid
@@ -171,7 +173,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(fieldReference('a?', 'num'), field('b', boolean))
+  const claim = fields(optionalFieldReference('a', 'num'), field('b', boolean))
   const lookup = { num: integer() }
   type Actual = ClaimValidation<typeof claim, typeof lookup>
   type Expected =
@@ -181,7 +183,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(field('a?', integer()), field('b', boolean))
+  const claim = fields(optionalField('a', integer()), field('b', boolean))
   const validation = validateClaim(claim, { a: 234.5 }, {})
   if (validation.validationType === 'KeyedValidations') {
     const { a, b } = validation.validations

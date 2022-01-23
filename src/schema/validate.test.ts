@@ -10,6 +10,8 @@ import {
   indexedReference,
   integer,
   number,
+  optionalField,
+  optionalFieldReference,
   string,
   tuple,
 } from './claims'
@@ -250,11 +252,11 @@ test('validateTuple indexedReference', (t) => {
 
 test('validateFields valid', (t) => {
   t.deepEqual(validateFields(fields(field('a', integer())), { a: 23 }, {}), valid)
-  t.deepEqual(validateFields(fields(field('a', integer()), field('b?', boolean)), { a: 23 }, {}), valid)
-  t.deepEqual(validateFields(fields(field('a', integer()), field('b?', boolean)), { a: 23, b: false }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer()), optionalField('b', boolean)), { a: 23 }, {}), valid)
+  t.deepEqual(validateFields(fields(field('a', integer()), optionalField('b', boolean)), { a: 23, b: false }, {}), valid)
   t.deepEqual(validateFields(fields(fieldReference('a', 'n')), { a: true }, { n: boolean }), valid)
-  t.deepEqual(validateFields(fields(fieldReference('a?', 'n')), { a: true }, { n: boolean }), valid)
-  t.deepEqual(validateFields(fields(fieldReference('a?', 'n')), {}, { n: boolean }), valid)
+  t.deepEqual(validateFields(fields(optionalFieldReference('a', 'n')), { a: true }, { n: boolean }), valid)
+  t.deepEqual(validateFields(fields(optionalFieldReference('a', 'n')), {}, { n: boolean }), valid)
   t.deepEqual(validateFields(fields(field('a', integer())), { a: 23, b: 34 }, {}), valid)
   t.deepEqual(validateFields(fields(field('a', integer())), { a: 23, b: { c: 'Hello' } }, {}), valid)
 })
@@ -268,7 +270,7 @@ test('validateFields unexpectedTypeOf', (t) => {
 test('validateFields missing', (t) => {
   t.deepEqual(validateFields(fields(field('a', integer())), { b: 23 }, {}), keyedValidations({ a: missing }, ['b']))
   t.deepEqual(
-    validateFields(fields(field('a', integer()), field('b?', boolean)), { b: false }, {}),
+    validateFields(fields(field('a', integer()), optionalField('b', boolean)), { b: false }, {}),
     keyedValidations({ a: missing, b: valid }, [])
   )
   t.deepEqual(

@@ -32,6 +32,15 @@ import {
   DateStringClaim,
   UnknownClaim,
   NeverClaim,
+  RegularField,
+  OptionalField,
+  DiscriminantField,
+  OptionalFieldReference,
+  isRegularField,
+  isOptionalField,
+  isDiscriminantField,
+  isFieldReference,
+  isOptionalFieldReference,
 } from './claims'
 
 import {
@@ -126,10 +135,11 @@ type _ValidationForFieldClaims<Fs extends Field[], RL extends ReferenceLookup> =
 
 // prettier-ignore
 type _ValidationForFieldClaim<F extends Field, RL extends ReferenceLookup> =
-  F extends FieldReference<`${infer Key}?`, infer Ref> ? { [k in Key]: ClaimValidation<RL[Ref], RL> } :
+  F extends RegularField<infer Key, infer Value> ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> | Missing } : never :
+  F extends OptionalField<infer Key, infer Value> ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> } : never :
+  F extends DiscriminantField<infer Key, infer Value> ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> | Missing } : never : // TODO
   F extends FieldReference<infer Key, infer Ref> ? { [k in Key]: ClaimValidation<RL[Ref], RL> | Missing } :
-  F extends [`${infer Key}?`, infer Value] ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> } : never :
-  F extends [`${infer Key}`, infer Value] ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> | Missing } : never :
+  F extends OptionalFieldReference<infer Key, infer Ref> ? { [k in Key]: ClaimValidation<RL[Ref], RL> } :
   never
 
 export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
@@ -240,13 +250,13 @@ export function validateFields<Fields extends Field[], RL extends ReferenceLooku
   let isValid = true
 
   for (const field of claim.fields) {
-    const [key, isOptional] = getFieldKey(field)
+    const key = getFieldKey(field)
 
     expectedKeys.push(key)
 
     // If the expected key isn't there
     if (!(key in obj)) {
-      const validation = isOptional ? valid : missing
+      const validation = isFieldOptional(field) ? valid : missing
       if (validation !== valid) isValid = false
 
       Object.assign(validations, { [key]: validation })
@@ -274,18 +284,30 @@ function isRecord(obj: unknown): obj is Record<string, unknown> {
   return typeof obj === 'object' && obj !== null && !Array.isArray(obj)
 }
 
-function getFieldKey(field: Field): [string, boolean] {
-  if ('fieldReference' in field) return trimQuestionMark(field.fieldReference[0])
-  if (Array.isArray(field)) return trimQuestionMark(field[0])
+function getFieldKey(field: Field): string {
+  if (isRegularField(field)) return field.field.key
+  if (isOptionalField(field)) return field.optionalField.key
+  if (isDiscriminantField(field)) return field.discriminantField.key
+  if (isFieldReference(field)) return field.fieldReference.key
+  if (isOptionalFieldReference(field)) return field.optionalFieldReference.key
   throw isNever(field)
 }
+
+function isFieldOptional(field: Field): boolean {
+  if (isRegularField(field)) return false
+  if (isOptionalField(field)) return true
+  if (isDiscriminantField(field)) return false
+  if (isFieldReference(field)) return false
+  if (isOptionalFieldReference(field)) return true
+  throw isNever(field)
+}
+
 
 function getFieldClaim<RL extends ReferenceLookup>(field: Field, referenceLookup: RL) {
-  if ('fieldReference' in field) return lookupReference(referenceLookup, field.fieldReference[1])
-  if (Array.isArray(field)) return field[1]
+  if (isRegularField(field)) return field.field.claim
+  if (isOptionalField(field)) return field.optionalField.claim
+  if (isDiscriminantField(field)) return field.discriminantField.claim
+  if (isFieldReference(field)) return lookupReference(referenceLookup, field.fieldReference.referenceName)
+  if (isOptionalFieldReference(field)) return lookupReference(referenceLookup, field.optionalFieldReference.referenceName)
   throw isNever(field)
-}
-
-function trimQuestionMark(fieldName: string): [string, boolean] {
-  return fieldName.endsWith('?') ? [fieldName.slice(0, fieldName.length - 1), true] : [fieldName, false]
 }

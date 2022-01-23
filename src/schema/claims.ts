@@ -69,14 +69,36 @@ export type IndexedReference<R extends string> = { indexedReference: R }
 export const indexedReference = <R extends string>(indexedReference: R): IndexedReference<R> => ({ indexedReference })
 export const isIndexedReference = hasField('indexedReference')
 
-export type Field = [string, Claim] | FieldReference<string, string>
-export type FieldReference<K extends string, R extends string> = { fieldReference: [K, R] }
-export const fieldReference = <K extends string, R extends string>(key: K, ref: R): FieldReference<K, R> => ({
-  fieldReference: [key, ref],
+export type Field =
+  | RegularField<string, Claim>
+  | OptionalField<string, Claim>
+  | DiscriminantField<string, Claim>
+  | FieldReference<string, string>
+  | OptionalFieldReference<string, string>
+
+export type RegularField<K extends string, C extends Claim> = { field: { key: K, claim: C } }
+export type OptionalField<K extends string, C extends Claim> = { optionalField: { key: K, claim: C } }
+export type DiscriminantField<K extends string, C extends Claim> = { discriminantField: { key: K, claim: C } }
+export type FieldReference<K extends string, R extends string> = { fieldReference: { key: K, referenceName: R } }
+export type OptionalFieldReference<K extends string, R extends string> = { optionalFieldReference: { key: K, referenceName: R } }
+
+export const field = <K extends string, C extends Claim>(key: K, claim: C): RegularField<K, C> => ({ field: { key, claim } })
+export const optionalField = <K extends string, C extends Claim>(key: K, claim: C): OptionalField<K, C> => ({ optionalField: { key, claim } })
+export const discriminantField = <K extends string, C extends Claim>(key: K, claim: C): DiscriminantField<K, C> => ({ discriminantField: { key, claim } })
+export const fieldReference = <K extends string, R extends string>(key: K, referenceName: R): FieldReference<K, R> => ({
+  fieldReference: { key, referenceName },
+})
+export const optionalFieldReference = <K extends string, R extends string>(key: K, referenceName: R): OptionalFieldReference<K, R> => ({
+  optionalFieldReference: { key, referenceName },
 })
 
+export const isRegularField = hasField('field')
+export const isOptionalField = hasField('optionalField')
+export const isDiscriminantField = hasField('discriminantField')
+export const isFieldReference = hasField('fieldReference')
+export const isOptionalFieldReference = hasField('optionalFieldReference')
+
 export type FieldsClaim<Fs extends Field[]> = { fields: Fs; exclusive: boolean }
-export const field = <K extends string, C extends Claim>(key: K, claim: C): [K, C] => [key, claim]
 export const fields = <Fs extends Field[]>(...fields: Fs): FieldsClaim<Fs> => ({ fields, exclusive: false })
 export const exclusiveFields = <Fs extends Field[]>(...fields: Fs): FieldsClaim<Fs> => ({
   fields,

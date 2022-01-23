@@ -20,6 +20,8 @@ import {
   dateString,
   unknown,
   never,
+  optionalField,
+  optionalFieldReference,
 } from './claims'
 
 type FileBrand = { readonly __brand: unique symbol }
@@ -91,7 +93,7 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(field('foo', integer()), field('bar?', boolean))
+  const claim = fields(field('foo', integer()), optionalField('bar', boolean))
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = { foo: number; bar?: boolean }
   assert<Equals<Actual, Expected>>()
@@ -118,10 +120,10 @@ type FileBrand = { readonly __brand: unique symbol }
   //prettier-ignore
   const claim = fields(
     field('foo', integer()),
-    field('bar?', boolean),
+    optionalField('bar', boolean),
     field('nested', fields(
       field('chew', or(integer(), boolean)),
-      field('lick?', constant(null))
+      optionalField('lick', constant(null))
     )))
 
   type Actual = ValueOfClaim<typeof claim, {}>
@@ -153,7 +155,7 @@ type FileBrand = { readonly __brand: unique symbol }
   // prettier-ignore
   const claim = fields(
     field('relations', fields(
-      fieldReference('child?', 'childRef'),
+      optionalFieldReference('child', 'childRef'),
       field('count', integer()))))
 
   interface IActual {
@@ -174,8 +176,8 @@ type FileBrand = { readonly __brand: unique symbol }
   const claim = or(
     fields(
       field('type', or(constant('+'), constant('-'))),
-      fieldReference('left?', 'left'),
-      fieldReference('right?', 'right')
+      optionalFieldReference('left', 'left'),
+      optionalFieldReference('right', 'right')
     ),
     fields(field('type', constant('num')))
   )

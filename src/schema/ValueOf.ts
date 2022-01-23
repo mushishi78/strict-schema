@@ -23,6 +23,10 @@ import {
   DateStringClaim,
   UnknownClaim,
   NeverClaim,
+  OptionalFieldReference,
+  RegularField,
+  OptionalField,
+  DiscriminantField,
 } from './claims'
 
 type References = Record<string, any>
@@ -68,15 +72,15 @@ type ValueOfFields<Fields extends Field[], Refs extends References> =
 
 // prettier-ignore
 type ValueOfField<F extends Field, Refs extends References> =
-  F extends FieldReference<`${infer Key}?`, `${infer Ref}`> ? Refs[Ref] :
-  F extends FieldReference<infer Key, `${infer Ref}`> ? Refs[Ref] :
-
-  F extends [`${infer Key}?`, infer C2] ? C2 extends Claim ?
-    { [k in Key]?: _ValueOfClaim<C2, Refs> } :
-    TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
-
-  F extends [`${infer Key}`, infer C2] ? C2 extends Claim ?
+  F extends RegularField<infer Key, infer C2> ? C2 extends Claim ?
     { [k in Key]: _ValueOfClaim<C2, Refs> } :
     TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
-
+  F extends OptionalField<infer Key, infer C2> ? C2 extends Claim ?
+    { [k in Key]?: _ValueOfClaim<C2, Refs> } :
+    TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
+  F extends DiscriminantField<infer Key, infer C2> ? C2 extends Claim ?
+    { [k in Key]: _ValueOfClaim<C2, Refs> } :
+    TypeError<['ValueOfField', 'Unrecognized value in field', C2]> :
+  F extends FieldReference<infer Key, infer Ref> ? Refs[Ref] :
+  F extends OptionalFieldReference<infer Key, infer Ref> ? Refs[Ref] :
   TypeError<['ValueOfField', 'Unrecognized field', F]>

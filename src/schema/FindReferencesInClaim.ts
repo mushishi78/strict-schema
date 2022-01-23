@@ -20,6 +20,10 @@ import {
   DateStringClaim,
   UnknownClaim,
   NeverClaim,
+  RegularField,
+  OptionalField,
+  DiscriminantField,
+  OptionalFieldReference,
 } from './claims'
 
 export type ReferenceLookup<C extends Claim> = LookupFromReferenceTuple<FindReferencesInClaim<C>>
@@ -31,8 +35,8 @@ type LookupFromReferenceTuple<Rs> =
 // prettier-ignore
 type LookupFromReference<R> =
   R extends IndexedReference<infer Ref> ? { [r in Ref]: any } :
-  R extends FieldReference<`${infer Key}?`, infer Ref> ? { [r in Ref]: { [k in Key]?: any } } :
-  R extends FieldReference<`${infer Key}`, infer Ref> ? { [r in Ref]: { [k in Key]: any } } :
+  R extends FieldReference<infer Key, infer Ref> ? { [r in Ref]: { [k in Key]: any } } :
+  R extends OptionalFieldReference<infer Key, infer Ref> ? { [r in Ref]: { [k in Key]?: any } } :
   {}
 
 // prettier-ignore
@@ -68,9 +72,11 @@ type FindReferencesInFields<Fields extends Field[]> =
 
 // prettier-ignore
 type FindReferencesInField<F extends Field> =
+  F extends RegularField<infer K, infer C> ? C extends Claim ? FindReferencesInClaim<C> : [] :
+  F extends OptionalField<infer K, infer C> ? C extends Claim ? FindReferencesInClaim<C> : [] :
+  F extends DiscriminantField<infer K, infer C> ? C extends Claim ? FindReferencesInClaim<C> : [] :
   F extends FieldReference<string, string> ? [F] :
-  F extends [infer K, infer C] ? C extends Claim ?
-    FindReferencesInClaim<C> : [] :
+  F extends OptionalFieldReference<string, string> ? [F] :
   [TypeError<['FindReferencesInFields', 'unrecognized field', F]>]
 
 // prettier-ignore

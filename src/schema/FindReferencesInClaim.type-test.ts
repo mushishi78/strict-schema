@@ -21,6 +21,7 @@ import {
   dateString,
   unknown,
   never,
+  optionalFieldReference,
 } from './claims'
 
 {
@@ -157,7 +158,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(fieldReference('a', 'node'), field('b', integer()), fieldReference('b?', 'pilot'))
+  const claim = fields(fieldReference('a', 'node'), field('b', integer()), optionalFieldReference('b', 'pilot'))
   type Actual = ReferenceLookup<typeof claim>
   type Expected = { node: { a: any }; pilot: { b?: any } }
   assert<Equals<Actual, Expected>>()
