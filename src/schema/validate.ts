@@ -69,6 +69,8 @@ import {
   Missing,
   NotInstanceOf,
   notInstanceOf,
+  DiscriminantInvalid,
+  discriminantInvalid,
 } from './validation'
 
 type ReferenceLookup = Record<string, Claim>
@@ -130,6 +132,7 @@ export type FieldsValidation<Fs extends Field[], RL extends ReferenceLookup> =
   | Valid
   | UnexpectedTypeOf
   | KeyedValidations<_ValidationForFieldClaims<Fs, RL>>
+  | (true extends _HasDiscriminant<Fs> ? DiscriminantInvalid : never)
 
 // prettier-ignore
 type _ValidationForFieldClaims<Fs extends Field[], RL extends ReferenceLookup> =
@@ -145,6 +148,13 @@ type _ValidationForFieldClaim<F extends Field, RL extends ReferenceLookup> =
   F extends FieldReference<infer Key, infer Ref> ? { [k in Key]: ClaimValidation<RL[Ref], RL> | Missing } :
   F extends OptionalFieldReference<infer Key, infer Ref> ? { [k in Key]: ClaimValidation<RL[Ref], RL> } :
   never
+
+// prettier-ignore
+type _HasDiscriminant<Fs extends Field[]> =
+  Fs extends [infer F, ...infer Rest] ?
+    F extends DiscriminantField<any, any> ? true :
+    Rest extends Field[] ? _HasDiscriminant<Rest> : false :
+  false
 
 export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   claim: C,
@@ -249,12 +259,31 @@ export function validateFields<Fields extends Field[], RL extends ReferenceLooku
 ): FieldsValidation<Fields, RL> {
   if (!isRecord(obj)) return unexpectedTypeOf('object', obj)
 
+  // First check is discriminant's are valid
+  for (const field of claim.fields) {
+    if (!isFieldDiscriminant(field)) continue
+    const key = getFieldKey(field)
+
+    // If missing, then invalid by default
+    if (!(key in obj)) return discriminantInvalid as FieldsValidation<Fields, RL>
+
+    // Validate the discriminant claim
+    const value = obj[key]
+    const claim = getFieldClaim(field, referenceLookup)
+    const validation = validateClaim(claim, value, referenceLookup)
+    if (validation !== valid) return discriminantInvalid as FieldsValidation<Fields, RL>
+  }
+
+  // Then validate other fields
+
   type Vs = _ValidationForFieldClaims<Fields, RL>
   const validations = {} as Vs
   const expectedKeys: string[] = []
   let isValid = true
 
   for (const field of claim.fields) {
+    if (isFieldDiscriminant(field)) continue
+
     const key = getFieldKey(field)
 
     expectedKeys.push(key)
@@ -304,6 +333,15 @@ function isFieldOptional(field: Field): boolean {
   if (isDiscriminantField(field)) return false
   if (isFieldReference(field)) return false
   if (isOptionalFieldReference(field)) return true
+  throw isNever(field)
+}
+
+function isFieldDiscriminant(field: Field): boolean {
+  if (isRegularField(field)) return false
+  if (isOptionalField(field)) return false
+  if (isDiscriminantField(field)) return true
+  if (isFieldReference(field)) return false
+  if (isOptionalFieldReference(field)) return false
   throw isNever(field)
 }
 

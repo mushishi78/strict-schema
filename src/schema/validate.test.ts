@@ -6,6 +6,7 @@ import {
   boolean,
   Claim,
   constant,
+  discriminantField,
   exclusiveFields,
   field,
   fieldReference,
@@ -32,6 +33,7 @@ import {
   keyedValidations,
   missing,
   notInstanceOf,
+  discriminantInvalid,
 } from './validation'
 
 function stringify(value: unknown) {
@@ -302,6 +304,9 @@ testValidate(
   keyedValidations({ a: notInteger(23.5) }, [])
 )
 testValidate(fields(fieldReference('a', 'n')), { a: 23 }, { n: integer() }, valid)
+
+testValidate(fields(discriminantField('type', constant('status'))), { type: 'stat' }, {}, discriminantInvalid)
+testValidate(fields(discriminantField('type', constant('status'))), { typ: 'status' }, {}, discriminantInvalid)
 
 //
 // instanceOf

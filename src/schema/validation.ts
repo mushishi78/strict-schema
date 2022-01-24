@@ -14,6 +14,7 @@ export type Failure =
   | UnexpectedLength
   | KeyedValidations<any>
   | Missing
+  | DiscriminantInvalid
   | NotInstanceOf<any>
 
 export interface Valid {
@@ -123,6 +124,12 @@ export interface Missing {
 }
 
 export const missing: Missing = { validationType: 'Missing' }
+
+export interface DiscriminantInvalid {
+  validationType: 'DiscriminantInvalid'
+}
+
+export const discriminantInvalid: DiscriminantInvalid = { validationType: 'DiscriminantInvalid' }
 
 export interface NotInstanceOf<C extends Constructor> {
   validationType: 'NotInstanceOf'
