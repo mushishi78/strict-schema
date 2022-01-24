@@ -45,7 +45,7 @@ import {
 {
   const claim = integer()
   type Actual = ClaimValidation<typeof claim, {}>
-  type Expected = Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger
+  type Expected = Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger
   assert<Equals<Actual, Expected>>()
 }
 {
@@ -72,14 +72,19 @@ import {
   type Expected =
     | Valid
     | UnexpectedTypeOf
-    | IndexedValidations<(Valid | UnexpectedTypeOf | IndexedValidations<(Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger)[]>)[]>
+    | IndexedValidations<
+        (Valid | UnexpectedTypeOf | IndexedValidations<(Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger)[]>)[]
+      >
   assert<Equals<Actual, Expected>>()
 }
 {
   const claim = array(indexedReference('num'))
   const lookup = { num: integer() }
   type Actual = ClaimValidation<typeof claim, typeof lookup>
-  type Expected = Valid | UnexpectedTypeOf | IndexedValidations<(Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger)[]>
+  type Expected =
+    | Valid
+    | UnexpectedTypeOf
+    | IndexedValidations<(Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger)[]>
   assert<Equals<Actual, Expected>>()
 }
 {
@@ -95,7 +100,7 @@ import {
     | Valid
     | UnexpectedTypeOf
     | UnexpectedLength
-    | IndexedValidations<[Valid | NotConstant<256>, Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger]>
+    | IndexedValidations<[Valid | NotConstant<256>, Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger]>
   assert<Equals<Actual, Expected>>()
 }
 {
@@ -106,7 +111,12 @@ import {
     | UnexpectedTypeOf
     | UnexpectedLength
     | IndexedValidations<
-        [Valid | UnexpectedTypeOf | UnexpectedLength | IndexedValidations<[Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger]>]
+        [
+          | Valid
+          | UnexpectedTypeOf
+          | UnexpectedLength
+          | IndexedValidations<[Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger]>
+        ]
       >
   assert<Equals<Actual, Expected>>()
 }
@@ -118,7 +128,7 @@ import {
     | Valid
     | UnexpectedTypeOf
     | UnexpectedLength
-    | IndexedValidations<[Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger]>
+    | IndexedValidations<[Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger]>
   assert<Equals<Actual, Expected>>()
 }
 {
@@ -129,7 +139,7 @@ import {
     | Valid
     | UnexpectedTypeOf
     | UnexpectedLength
-    | IndexedValidations<[Valid | NotConstant<0>, Valid | UnexpectedTypeOf |  NotInNumberRanges | NotInteger]>
+    | IndexedValidations<[Valid | NotConstant<0>, Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger]>
   assert<Equals<Actual, Expected>>()
 }
 {
@@ -140,7 +150,7 @@ import {
       assert<Equals<typeof v0, UnexpectedTypeOf>>()
     }
     if (!isValid(v1)) {
-      assert<Equals<typeof v1, UnexpectedTypeOf |  NotInNumberRanges | NotInteger>>()
+      assert<Equals<typeof v1, UnexpectedTypeOf | NotInNumberRanges | NotInteger>>()
     }
   }
 }
@@ -188,7 +198,7 @@ import {
   if (validation.validationType === 'KeyedValidations') {
     const { a, b } = validation.validations
     if (!isValid(a)) {
-      assert<Equals<typeof a, UnexpectedTypeOf |  NotInNumberRanges | NotInteger>>()
+      assert<Equals<typeof a, UnexpectedTypeOf | NotInNumberRanges | NotInteger>>()
     }
     if (!isValid(b)) {
       assert<Equals<typeof b, UnexpectedTypeOf | Missing>>()

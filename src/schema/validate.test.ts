@@ -103,7 +103,16 @@ test('validateNumber notInNumberRanges', (t) => {
     validateNumber(number([-Infinity, '< n <', Infinity]), Infinity),
     notInNumberRanges([[-Infinity, '< n <', Infinity]], Infinity)
   )
-  t.deepEqual(validateNumber(number([0, '< n <', 5], [10, '< n <', 15]), 0), notInNumberRanges([[0, '< n <', 5], [10, '< n <', 15]], 0))
+  t.deepEqual(
+    validateNumber(number([0, '< n <', 5], [10, '< n <', 15]), 0),
+    notInNumberRanges(
+      [
+        [0, '< n <', 5],
+        [10, '< n <', 15],
+      ],
+      0
+    )
+  )
 })
 
 test('validateInteger valid', (t) => {
@@ -253,7 +262,10 @@ test('validateTuple indexedReference', (t) => {
 test('validateFields valid', (t) => {
   t.deepEqual(validateFields(fields(field('a', integer())), { a: 23 }, {}), valid)
   t.deepEqual(validateFields(fields(field('a', integer()), optionalField('b', boolean)), { a: 23 }, {}), valid)
-  t.deepEqual(validateFields(fields(field('a', integer()), optionalField('b', boolean)), { a: 23, b: false }, {}), valid)
+  t.deepEqual(
+    validateFields(fields(field('a', integer()), optionalField('b', boolean)), { a: 23, b: false }, {}),
+    valid
+  )
   t.deepEqual(validateFields(fields(fieldReference('a', 'n')), { a: true }, { n: boolean }), valid)
   t.deepEqual(validateFields(fields(optionalFieldReference('a', 'n')), { a: true }, { n: boolean }), valid)
   t.deepEqual(validateFields(fields(optionalFieldReference('a', 'n')), {}, { n: boolean }), valid)

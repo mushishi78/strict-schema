@@ -302,12 +302,12 @@ function isFieldOptional(field: Field): boolean {
   throw isNever(field)
 }
 
-
 function getFieldClaim<RL extends ReferenceLookup>(field: Field, referenceLookup: RL) {
   if (isRegularField(field)) return field.field.claim
   if (isOptionalField(field)) return field.optionalField.claim
   if (isDiscriminantField(field)) return field.discriminantField.claim
   if (isFieldReference(field)) return lookupReference(referenceLookup, field.fieldReference.referenceName)
-  if (isOptionalFieldReference(field)) return lookupReference(referenceLookup, field.optionalFieldReference.referenceName)
+  if (isOptionalFieldReference(field))
+    return lookupReference(referenceLookup, field.optionalFieldReference.referenceName)
   throw isNever(field)
 }
