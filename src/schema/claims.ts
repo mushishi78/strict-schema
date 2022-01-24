@@ -1,4 +1,5 @@
 import { NumberRange } from '../lib/number-range'
+import { Constructor } from '../lib/type-helpers'
 import { hasField } from '../lib/unknown'
 
 export type Claim =
@@ -123,8 +124,7 @@ export const brand =
   <C extends Claim>(claim: C): BrandClaim<Brand, C> => ({ branded: claim })
 export const isBrandClaim = hasField('branded')
 
-type Constructor = new (...args: any) => any
-export type InstanceOfClaim<C extends Constructor = never> = { instanceOf: C }
+export type InstanceOfClaim<C extends Constructor> = { instanceOf: C }
 export const instanceOf = <C extends Constructor = never>(instanceOf: C): InstanceOfClaim<C> => ({
   instanceOf,
 })

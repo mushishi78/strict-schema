@@ -3,11 +3,13 @@ import { BooleanValidation, ClaimValidation, IntegerValidation, validateClaim } 
 import {
   array,
   boolean,
+  Claim,
   constant,
   field,
   fieldReference,
   fields,
   indexedReference,
+  instanceOf,
   integer,
   number,
   optionalField,
@@ -28,6 +30,8 @@ import {
   isValid,
   KeyedValidations,
   Missing,
+  notInstanceOf,
+  NotInstanceOf,
 } from './validation'
 
 {
@@ -204,4 +208,10 @@ import {
       assert<Equals<typeof b, UnexpectedTypeOf | Missing>>()
     }
   }
+}
+{
+  const claim = instanceOf(Date)
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = Valid | NotInstanceOf<typeof Date>
+  assert<Equals<Actual, Expected>>()
 }

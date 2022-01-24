@@ -8,6 +8,7 @@ import {
   fieldReference,
   fields,
   indexedReference,
+  instanceOf,
   integer,
   number,
   optionalField,
@@ -21,6 +22,7 @@ import {
   validateBoolean,
   validateConstant,
   validateFields,
+  validateInstanceOf,
   validateInteger,
   validateNumber,
   validateString,
@@ -38,6 +40,7 @@ import {
   unexpectedLength,
   keyedValidations,
   missing,
+  notInstanceOf,
 } from './validation'
 
 test('validateConstant valid', (t) => {
@@ -311,4 +314,12 @@ test('validateFields fieldReference', (t) => {
     keyedValidations({ a: notInteger(23.5) }, [])
   )
   t.deepEqual(validateFields(fields(fieldReference('a', 'n')), { a: 23 }, { n: integer() }), valid)
+})
+
+test('validateInstanceOf valid', (t) => {
+  t.deepEqual(validateInstanceOf(instanceOf(Date), new Date(2021, 1, 0)), valid)
+})
+
+test('validateInstanceOf notInstanceOf', (t) => {
+  t.deepEqual(validateInstanceOf(instanceOf(Date), '2021-01-01T00:00:00'), notInstanceOf(Date))
 })

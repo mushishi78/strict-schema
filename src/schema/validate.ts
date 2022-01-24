@@ -1,5 +1,5 @@
 import { isInNumberRanges } from '../lib/number-range'
-import { isNever, TypeError } from '../lib/type-helpers'
+import { Constructor, isNever, TypeError } from '../lib/type-helpers'
 
 import {
   ContantTypes,
@@ -41,6 +41,7 @@ import {
   isDiscriminantField,
   isFieldReference,
   isOptionalFieldReference,
+  isInstanceOfClaim,
 } from './claims'
 
 import {
@@ -66,6 +67,8 @@ import {
   missing,
   keyedValidations,
   Missing,
+  NotInstanceOf,
+  notInstanceOf,
 } from './validation'
 
 type ReferenceLookup = Record<string, Claim>
@@ -85,7 +88,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
   [C] extends [FieldsClaim<infer Fields>] ? FieldsValidation<Fields, RL> :
   [C] extends [BrandClaim<any, infer NestedClaim>] ? ClaimValidation<NestedClaim, RL> : // TODO
-  [C] extends [InstanceOfClaim<any>] ? Valid : // TODO
+  [C] extends [InstanceOfClaim<infer C>] ? InstanceOfValidation<C> :
   [C] extends [OrClaim<any>] ? Valid : // TODO
   TypeError<['ClaimValidation', 'unrecognized claim', C]>
 
@@ -104,6 +107,7 @@ export type NumberValidation = Valid | UnexpectedTypeOf | NotInNumberRanges
 export type IntegerValidation = Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger
 export type StringValidation = Valid | UnexpectedTypeOf | NotInStringRange
 export type BooleanValidation = Valid | UnexpectedTypeOf
+export type InstanceOfValidation<C extends Constructor> = Valid | NotInstanceOf<C>
 
 export type ArrayValidation<C extends IndexedClaim, RL extends ReferenceLookup> =
   | Valid
@@ -155,6 +159,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isFieldsClaim(claim)) return validateFields(claim, value, referenceLookup) as ClaimValidation<C, RL>
+  if (isInstanceOfClaim(claim)) return validateInstanceOf(claim, value) as ClaimValidation<C, RL>
   throw new Error(`Unrecognied claim: ${claim}`)
 }
 
@@ -310,4 +315,11 @@ function getFieldClaim<RL extends ReferenceLookup>(field: Field, referenceLookup
   if (isOptionalFieldReference(field))
     return lookupReference(referenceLookup, field.optionalFieldReference.referenceName)
   throw isNever(field)
+}
+
+export function validateInstanceOf<C extends Constructor>(
+  claim: InstanceOfClaim<C>,
+  value: unknown
+): InstanceOfValidation<C> {
+  return value instanceof claim.instanceOf ? valid : notInstanceOf(claim.instanceOf)
 }

@@ -1,4 +1,5 @@
 import { NumberRange } from '../lib/number-range'
+import { Constructor } from '../lib/type-helpers'
 import { ContantTypes } from './claims'
 
 export type Validation = Valid | Failure
@@ -13,6 +14,7 @@ export type Failure =
   | UnexpectedLength
   | KeyedValidations<any>
   | Missing
+  | NotInstanceOf<any>
 
 export interface Valid {
   validationType: 'Valid'
@@ -121,3 +123,13 @@ export interface Missing {
 }
 
 export const missing: Missing = { validationType: 'Missing' }
+
+export interface NotInstanceOf<C extends Constructor> {
+  validationType: 'NotInstanceOf'
+  constructor: C
+}
+
+export const notInstanceOf = <C extends Constructor>(constructor: C): NotInstanceOf<C> => ({
+  validationType: 'NotInstanceOf',
+  constructor,
+})
