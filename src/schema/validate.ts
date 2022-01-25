@@ -1,6 +1,7 @@
 import { isInNumberRanges } from '../lib/number-range'
 import { Constructor, isNever, TypeError } from '../lib/type-helpers'
 import * as uuid from 'uuid'
+import validator from 'validator'
 
 import {
   ContantTypes,
@@ -48,6 +49,7 @@ import {
   isUuidClaim,
   isUnknownClaim,
   isNeverClaim,
+  isDateStringClaim,
 } from './claims'
 
 import {
@@ -94,7 +96,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [IntegerClaim] ? IntegerValidation :
   [C] extends [StringClaim] ? StringValidation :
   [C] extends [UuidClaim] ? UuidValidation :
-  [C] extends [DateStringClaim] ? Valid : // TODO
+  [C] extends [DateStringClaim] ? DateStringValidation :
   [C] extends [BooleanClaim] ? BooleanValidation :
   [C] extends [UnknownClaim] ? Valid :
   [C] extends [NeverClaim] ? NotNever :
@@ -121,6 +123,7 @@ export type NumberValidation = Valid | UnexpectedTypeOf | NotInNumberRanges
 export type IntegerValidation = Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger
 export type StringValidation = Valid | UnexpectedTypeOf | NotInStringRange
 export type UuidValidation = Valid | UnexpectedTypeOf | IncorrectFormat
+export type DateStringValidation = Valid | UnexpectedTypeOf | IncorrectFormat
 export type BooleanValidation = Valid | UnexpectedTypeOf
 export type InstanceOfValidation<C extends Constructor> = Valid | NotInstanceOf<C>
 
@@ -189,6 +192,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isIntegerClaim(claim)) return validateInteger(claim, value) as ClaimValidation<C, RL>
   if (isStringClaim(claim)) return validateString(claim, value) as ClaimValidation<C, RL>
   if (isUuidClaim(claim)) return validateUuid(claim, value) as ClaimValidation<C, RL>
+  if (isDateStringClaim(claim)) return validateDateString(claim, value) as ClaimValidation<C, RL>
   if (isUnknownClaim(claim)) return valid as ClaimValidation<C, RL>
   if (isNeverClaim(claim)) return notNever as ClaimValidation<C, RL>
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
@@ -249,6 +253,22 @@ export function validateString(claim: StringClaim, value: unknown): StringValida
 export function validateUuid(_: UuidClaim, value: unknown): UuidValidation {
   if (typeof value !== 'string') return unexpectedTypeOf('string', value)
   return uuid.validate(value) ? valid : incorrectFormat('uuid', value)
+}
+
+export function validateDateString(claim: DateStringClaim, value: unknown): DateStringValidation {
+  if (typeof value !== 'string') return unexpectedTypeOf('string', value)
+
+  if (claim.dateString.format === 'iso8601') {
+    return validator.isISO8601(value, { strict: true, strictSeparator: true } as any)
+      ? valid
+      : incorrectFormat('iso8601', value)
+  }
+
+  if (claim.dateString.format === 'rfc3339') {
+    return validator.isRFC3339(value) ? valid : incorrectFormat('rfc3339', value)
+  }
+
+  throw isNever(claim.dateString.format)
 }
 
 export function validateBoolean(_: BooleanClaim, value: unknown): BooleanValidation {

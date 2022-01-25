@@ -43,7 +43,7 @@ export const uuid = (): UuidClaim => ({ uuid: {} })
 export const isUuidClaim = hasField('uuid')
 
 export type DateStringClaim = { dateString: { format: 'rfc3339' | 'iso8601' } }
-export const dateString = (format: 'rfc3339' | 'iso8601' = 'rfc3339'): DateStringClaim => ({ dateString: { format } })
+export const dateString = (format: 'rfc3339' | 'iso8601' = 'iso8601'): DateStringClaim => ({ dateString: { format } })
 export const isDateStringClaim = hasField('dateString')
 
 export type BooleanClaim = { boolean: {} }

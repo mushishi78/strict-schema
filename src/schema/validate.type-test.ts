@@ -30,6 +30,7 @@ import {
   uuid,
   unknown,
   never,
+  dateString,
 } from './claims'
 
 import {
@@ -77,6 +78,12 @@ import {
 }
 {
   const claim = uuid()
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = Valid | UnexpectedTypeOf | IncorrectFormat
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = dateString()
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected = Valid | UnexpectedTypeOf | IncorrectFormat
   assert<Equals<Actual, Expected>>()

@@ -7,6 +7,7 @@ import {
   brand,
   Claim,
   constant,
+  dateString,
   discriminantField,
   exclusiveFields,
   field,
@@ -179,6 +180,14 @@ testValidate(string(1, 4), 'Hello', {}, notInStringRange([1, 4], 'Hello'))
 
 testValidate(uuid(), '9e7c82b1-12f6-49a6-ace0-c8c283c56018', {}, valid)
 testValidate(uuid(), 'Hello', {}, incorrectFormat('uuid', 'Hello'))
+
+//
+// dateString
+
+testValidate(dateString(), '2021-01-01T01:45:00', {}, valid)
+testValidate(dateString(), '2021-01-01 01:45:00', {}, incorrectFormat('iso8601', '2021-01-01 01:45:00'))
+testValidate(dateString('rfc3339'), '2021-01-01 01:45:00+00:00', {}, valid)
+testValidate(dateString('rfc3339'), '2021-01-01T01:45:00', {}, incorrectFormat('rfc3339', '2021-01-01T01:45:00'))
 
 //
 // boolean
