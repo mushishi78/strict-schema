@@ -160,7 +160,7 @@ type _ValidationForFieldClaims<Fs extends Field[], RL extends ReferenceLookup> =
 type _ValidationForFieldClaim<F extends Field, RL extends ReferenceLookup> =
   F extends RegularField<infer Key, infer Value> ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> | Missing } : never :
   F extends OptionalField<infer Key, infer Value> ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> } : never :
-  F extends DiscriminantField<infer Key, infer Value> ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> | Missing } : never : // TODO
+  F extends DiscriminantField<infer Key, infer Value> ? Value extends Claim ? { [k in Key]: ClaimValidation<Value, RL> | Missing } : never :
   F extends FieldReference<infer Key, infer Ref> ? { [k in Key]: ClaimValidation<RL[Ref], RL> | Missing } :
   F extends OptionalFieldReference<infer Key, infer Ref> ? { [k in Key]: ClaimValidation<RL[Ref], RL> } :
   never
