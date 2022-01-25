@@ -16,6 +16,7 @@ export type Failure =
   | Missing
   | DiscriminantInvalid
   | NotInstanceOf<any>
+  | UnionOfValidations<any>
 
 export interface Valid {
   validationType: 'Valid'
@@ -139,4 +140,14 @@ export interface NotInstanceOf<C extends Constructor> {
 export const notInstanceOf = <C extends Constructor>(constructor: C): NotInstanceOf<C> => ({
   validationType: 'NotInstanceOf',
   constructor,
+})
+
+export interface UnionOfValidations<Vs extends Validation[]> {
+  validationType: 'UnionOfValidations'
+  validations: Vs
+}
+
+export const unionOfValidations = <Vs extends Validation[]>(...validations: Vs): UnionOfValidations<Vs> => ({
+  validationType: 'UnionOfValidations',
+  validations,
 })

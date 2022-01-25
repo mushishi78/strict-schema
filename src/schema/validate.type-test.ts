@@ -1,5 +1,13 @@
 import { assert, Equals } from 'tsafe'
-import { BooleanValidation, ClaimValidation, IntegerValidation, validateClaim } from './validate'
+import {
+  BooleanValidation,
+  ClaimValidation,
+  ConstantValidation,
+  InstanceOfValidation,
+  IntegerValidation,
+  StringValidation,
+  validateClaim,
+} from './validate'
 import {
   array,
   boolean,
@@ -16,6 +24,7 @@ import {
   optionalFieldReference,
   string,
   tuple,
+  or,
 } from './claims'
 
 import {
@@ -30,9 +39,9 @@ import {
   isValid,
   KeyedValidations,
   Missing,
-  notInstanceOf,
   NotInstanceOf,
   DiscriminantInvalid,
+  UnionOfValidations,
 } from './validation'
 
 {
@@ -224,5 +233,17 @@ import {
   const claim = instanceOf(Date)
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected = Valid | NotInstanceOf<typeof Date>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = or(constant(256), constant('apple'))
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = Valid | UnionOfValidations<[ConstantValidation<256>, ConstantValidation<'apple'>]>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = or(integer(), string(), instanceOf(Date))
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = Valid | UnionOfValidations<[IntegerValidation, StringValidation, InstanceOfValidation<typeof Date>]>
   assert<Equals<Actual, Expected>>()
 }

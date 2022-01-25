@@ -42,6 +42,7 @@ import {
   isFieldReference,
   isOptionalFieldReference,
   isInstanceOfClaim,
+  isOrClaim,
 } from './claims'
 
 import {
@@ -71,6 +72,8 @@ import {
   notInstanceOf,
   DiscriminantInvalid,
   discriminantInvalid,
+  UnionOfValidations,
+  unionOfValidations,
 } from './validation'
 
 type ReferenceLookup = Record<string, Claim>
@@ -91,7 +94,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [FieldsClaim<infer Fields>] ? FieldsValidation<Fields, RL> :
   [C] extends [BrandClaim<any, infer NestedClaim>] ? ClaimValidation<NestedClaim, RL> : // TODO
   [C] extends [InstanceOfClaim<infer C>] ? InstanceOfValidation<C> :
-  [C] extends [OrClaim<any>] ? Valid : // TODO
+  [C] extends [OrClaim<infer NestedClaims>] ? OrValidation<NestedClaims, RL> : // TODO
   TypeError<['ClaimValidation', 'unrecognized claim', C]>
 
 // prettier-ignore
@@ -156,6 +159,16 @@ type _HasDiscriminant<Fs extends Field[]> =
     Rest extends Field[] ? _HasDiscriminant<Rest> : false :
   false
 
+export type OrValidation<Cs extends Claim[], RL extends ReferenceLookup> =
+  | Valid
+  | UnionOfValidations<_ValidationForOrClaims<Cs, RL>>
+
+// prettier-ignore
+type _ValidationForOrClaims<Cs extends Claim[], RL extends ReferenceLookup> =
+  Cs extends [infer C, ...infer Rest] ? C extends Claim ? Rest extends Claim[] ?
+    [ClaimValidation<C, RL>, ..._ValidationForTupleClaims<Rest, RL>] : [] : [] :
+  []
+
 export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   claim: C,
   value: unknown,
@@ -170,6 +183,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isFieldsClaim(claim)) return validateFields(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isInstanceOfClaim(claim)) return validateInstanceOf(claim, value) as ClaimValidation<C, RL>
+  if (isOrClaim(claim)) return validateOr(claim, value, referenceLookup) as ClaimValidation<C, RL>
   throw new Error(`Unrecognied claim: ${claim}`)
 }
 
@@ -360,4 +374,19 @@ export function validateInstanceOf<C extends Constructor>(
   value: unknown
 ): InstanceOfValidation<C> {
   return value instanceof claim.instanceOf ? valid : notInstanceOf(claim.instanceOf)
+}
+
+export function validateOr<Cs extends Claim[], RL extends ReferenceLookup>(
+  claim: OrClaim<Cs>,
+  value: unknown,
+  referenceLookup: RL
+): OrValidation<Cs, RL> {
+  type Vs = _ValidationForOrClaims<Cs, RL>
+  const validations = [] as Vs
+
+  claim.or.forEach((c, i) => {
+    validations[i] = validateClaim(c, value, referenceLookup) as Vs[typeof i]
+  })
+
+  return validations.some(isValid) ? valid : unionOfValidations(...validations)
 }

@@ -17,6 +17,7 @@ import {
   number,
   optionalField,
   optionalFieldReference,
+  or,
   string,
   tuple,
 } from './claims'
@@ -34,6 +35,7 @@ import {
   missing,
   notInstanceOf,
   discriminantInvalid,
+  unionOfValidations,
 } from './validation'
 
 function stringify(value: unknown) {
@@ -313,3 +315,24 @@ testValidate(fields(discriminantField('type', constant('status'))), { typ: 'stat
 
 testValidate(instanceOf(Date), new Date(2021, 1, 0), {}, valid)
 testValidate(instanceOf(Date), '2021-01-01T00:00:00', {}, notInstanceOf(Date))
+
+//
+// or
+
+testValidate(or(number(), instanceOf(Date)), new Date(2021, 1, 0), {}, valid)
+testValidate(or(number(), instanceOf(Date)), 50, {}, valid)
+testValidate(
+  or(number(), instanceOf(Date)),
+  'Hello',
+  {},
+  unionOfValidations(unexpectedTypeOf('number', 'Hello'), notInstanceOf(Date))
+)
+testValidate(
+  or(
+    fields(discriminantField('type', constant('status')), field('status', number())),
+    fields(discriminantField('type', constant('plate')), field('angle', number()))
+  ),
+  { type: 'keyboard', keys: 45 },
+  {},
+  unionOfValidations(discriminantInvalid, discriminantInvalid)
+)
