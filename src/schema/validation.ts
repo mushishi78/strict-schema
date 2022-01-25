@@ -83,6 +83,18 @@ export const notInStringRange = (stringRange: [number, number], value: string): 
   value,
 })
 
+export interface IncorrectFormat {
+  validationType: 'IncorrectFormat'
+  expectedFormat: string
+  value: unknown
+}
+
+export const incorrectFormat = (expectedFormat: string, value: unknown): IncorrectFormat => ({
+  validationType: 'IncorrectFormat',
+  expectedFormat,
+  value,
+})
+
 export interface IndexedValidations<Vs extends Validation[]> {
   validationType: 'IndexedValidations'
   validations: Vs

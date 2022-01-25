@@ -21,6 +21,7 @@ import {
   or,
   string,
   tuple,
+  uuid,
 } from './claims'
 
 import {
@@ -37,6 +38,7 @@ import {
   notInstanceOf,
   discriminantInvalid,
   unionOfValidations,
+  incorrectFormat,
 } from './validation'
 
 function stringify(value: unknown) {
@@ -168,6 +170,12 @@ testValidate(string(), undefined, {}, unexpectedTypeOf('string', undefined))
 
 testValidate(string(1, 4), '', {}, notInStringRange([1, 4], ''))
 testValidate(string(1, 4), 'Hello', {}, notInStringRange([1, 4], 'Hello'))
+
+//
+// uuid
+
+testValidate(uuid(), '9e7c82b1-12f6-49a6-ace0-c8c283c56018', {}, valid)
+testValidate(uuid(), 'Hello', {}, incorrectFormat('uuid', 'Hello'))
 
 //
 // boolean

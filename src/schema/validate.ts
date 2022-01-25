@@ -1,5 +1,6 @@
 import { isInNumberRanges } from '../lib/number-range'
 import { Constructor, isNever, TypeError } from '../lib/type-helpers'
+import * as uuid from 'uuid'
 
 import {
   ContantTypes,
@@ -44,6 +45,7 @@ import {
   isInstanceOfClaim,
   isOrClaim,
   isBrandClaim,
+  isUuidClaim,
 } from './claims'
 
 import {
@@ -75,6 +77,8 @@ import {
   discriminantInvalid,
   UnionOfValidations,
   unionOfValidations,
+  IncorrectFormat,
+  incorrectFormat,
 } from './validation'
 
 type ReferenceLookup = Record<string, Claim>
@@ -85,7 +89,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [NumberClaim] ? NumberValidation :
   [C] extends [IntegerClaim] ? IntegerValidation :
   [C] extends [StringClaim] ? StringValidation :
-  [C] extends [UuidClaim] ? Valid : // TODO
+  [C] extends [UuidClaim] ? UuidValidation :
   [C] extends [DateStringClaim] ? Valid : // TODO
   [C] extends [BooleanClaim] ? BooleanValidation :
   [C] extends [UnknownClaim] ? Valid : // TODO
@@ -112,6 +116,7 @@ export type ConstantValidation<Constant extends ContantTypes> = Valid | NotConst
 export type NumberValidation = Valid | UnexpectedTypeOf | NotInNumberRanges
 export type IntegerValidation = Valid | UnexpectedTypeOf | NotInNumberRanges | NotInteger
 export type StringValidation = Valid | UnexpectedTypeOf | NotInStringRange
+export type UuidValidation = Valid | UnexpectedTypeOf | IncorrectFormat
 export type BooleanValidation = Valid | UnexpectedTypeOf
 export type InstanceOfValidation<C extends Constructor> = Valid | NotInstanceOf<C>
 
@@ -179,6 +184,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isNumberClaim(claim)) return validateNumber(claim, value) as ClaimValidation<C, RL>
   if (isIntegerClaim(claim)) return validateInteger(claim, value) as ClaimValidation<C, RL>
   if (isStringClaim(claim)) return validateString(claim, value) as ClaimValidation<C, RL>
+  if (isUuidClaim(claim)) return validateUuid(claim, value) as ClaimValidation<C, RL>
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
   if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
@@ -232,6 +238,11 @@ export function validateString(claim: StringClaim, value: unknown): StringValida
   if (typeof value !== 'string') return unexpectedTypeOf('string', value)
   const [min, max] = claim.string.range
   return min <= value.length && max >= value.length ? valid : notInStringRange(claim.string.range, value)
+}
+
+export function validateUuid(_: UuidClaim, value: unknown): UuidValidation {
+  if (typeof value !== 'string') return unexpectedTypeOf('string', value)
+  return uuid.validate(value) ? valid : incorrectFormat('uuid', value)
 }
 
 export function validateBoolean(_: BooleanClaim, value: unknown): BooleanValidation {

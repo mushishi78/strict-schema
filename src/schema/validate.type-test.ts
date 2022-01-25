@@ -27,6 +27,7 @@ import {
   tuple,
   or,
   brand,
+  uuid,
 } from './claims'
 
 import {
@@ -44,6 +45,7 @@ import {
   NotInstanceOf,
   DiscriminantInvalid,
   UnionOfValidations,
+  IncorrectFormat,
 } from './validation'
 
 {
@@ -68,6 +70,12 @@ import {
   const claim = string(0, 10)
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected = Valid | UnexpectedTypeOf | NotInStringRange
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = uuid()
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = Valid | UnexpectedTypeOf | IncorrectFormat
   assert<Equals<Actual, Expected>>()
 }
 {
