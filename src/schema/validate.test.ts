@@ -4,6 +4,7 @@ import { ClaimValidation, validateClaim } from './validate'
 import {
   array,
   boolean,
+  brand,
   Claim,
   constant,
   discriminantField,
@@ -309,6 +310,12 @@ testValidate(fields(fieldReference('a', 'n')), { a: 23 }, { n: integer() }, vali
 
 testValidate(fields(discriminantField('type', constant('status'))), { type: 'stat' }, {}, discriminantInvalid)
 testValidate(fields(discriminantField('type', constant('status'))), { typ: 'status' }, {}, discriminantInvalid)
+
+// brand
+
+type FileId = number & { readonly __brand: unique symbol }
+
+testValidate(brand<FileId>()(number()), 45, {}, valid)
 
 //
 // instanceOf

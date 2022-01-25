@@ -43,6 +43,7 @@ import {
   isOptionalFieldReference,
   isInstanceOfClaim,
   isOrClaim,
+  isBrandClaim,
 } from './claims'
 
 import {
@@ -92,9 +93,9 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
   [C] extends [FieldsClaim<infer Fields>] ? FieldsValidation<Fields, RL> :
-  [C] extends [BrandClaim<any, infer NestedClaim>] ? ClaimValidation<NestedClaim, RL> : // TODO
+  [C] extends [BrandClaim<any, infer NestedClaim>] ? ClaimValidation<NestedClaim, RL> :
   [C] extends [InstanceOfClaim<infer C>] ? InstanceOfValidation<C> :
-  [C] extends [OrClaim<infer NestedClaims>] ? OrValidation<NestedClaims, RL> : // TODO
+  [C] extends [OrClaim<infer NestedClaims>] ? OrValidation<NestedClaims, RL> :
   TypeError<['ClaimValidation', 'unrecognized claim', C]>
 
 // prettier-ignore
@@ -182,6 +183,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isFieldsClaim(claim)) return validateFields(claim, value, referenceLookup) as ClaimValidation<C, RL>
+  if (isBrandClaim(claim)) return validateClaim(claim.branded, value, referenceLookup) as ClaimValidation<C, RL>
   if (isInstanceOfClaim(claim)) return validateInstanceOf(claim, value) as ClaimValidation<C, RL>
   if (isOrClaim(claim)) return validateOr(claim, value, referenceLookup) as ClaimValidation<C, RL>
   throw new Error(`Unrecognied claim: ${claim}`)

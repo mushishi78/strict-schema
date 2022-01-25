@@ -5,6 +5,7 @@ import {
   ConstantValidation,
   InstanceOfValidation,
   IntegerValidation,
+  NumberValidation,
   StringValidation,
   validateClaim,
 } from './validate'
@@ -25,6 +26,7 @@ import {
   string,
   tuple,
   or,
+  brand,
 } from './claims'
 
 import {
@@ -227,6 +229,13 @@ import {
     | UnexpectedTypeOf
     | DiscriminantInvalid
     | KeyedValidations<{ a: IntegerValidation | Missing } & { b: BooleanValidation | Missing }>
+  assert<Equals<Actual, Expected>>()
+}
+{
+  type FileId = number & { readonly __brand: unique symbol }
+  const claim = brand<FileId>()(number())
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = NumberValidation
   assert<Equals<Actual, Expected>>()
 }
 {
