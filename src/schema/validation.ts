@@ -95,6 +95,12 @@ export const incorrectFormat = (expectedFormat: string, value: unknown): Incorre
   value,
 })
 
+export interface NotNever {
+  validationType: 'NotNever'
+}
+
+export const notNever: NotNever = { validationType: 'NotNever' }
+
 export interface IndexedValidations<Vs extends Validation[]> {
   validationType: 'IndexedValidations'
   validations: Vs

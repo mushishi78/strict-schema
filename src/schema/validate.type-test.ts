@@ -29,6 +29,7 @@ import {
   brand,
   uuid,
   unknown,
+  never,
 } from './claims'
 
 import {
@@ -47,6 +48,7 @@ import {
   DiscriminantInvalid,
   UnionOfValidations,
   IncorrectFormat,
+  NotNever,
 } from './validation'
 
 {
@@ -89,6 +91,12 @@ import {
   const claim = unknown
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected = Valid
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = never
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = NotNever
   assert<Equals<Actual, Expected>>()
 }
 {

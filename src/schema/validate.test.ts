@@ -15,6 +15,7 @@ import {
   indexedReference,
   instanceOf,
   integer,
+  never,
   number,
   optionalField,
   optionalFieldReference,
@@ -40,6 +41,7 @@ import {
   discriminantInvalid,
   unionOfValidations,
   incorrectFormat,
+  notNever,
 } from './validation'
 
 function stringify(value: unknown) {
@@ -194,6 +196,12 @@ testValidate(boolean, undefined, {}, unexpectedTypeOf('boolean', undefined))
 
 testValidate(unknown, true, {}, valid)
 testValidate(unknown, 'hello', {}, valid)
+
+//
+// never
+
+testValidate(never, true, {}, notNever)
+testValidate(never, 'hello', {}, notNever)
 
 //
 // array

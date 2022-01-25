@@ -47,6 +47,7 @@ import {
   isBrandClaim,
   isUuidClaim,
   isUnknownClaim,
+  isNeverClaim,
 } from './claims'
 
 import {
@@ -80,6 +81,8 @@ import {
   unionOfValidations,
   IncorrectFormat,
   incorrectFormat,
+  NotNever,
+  notNever,
 } from './validation'
 
 type ReferenceLookup = Record<string, Claim>
@@ -94,7 +97,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [DateStringClaim] ? Valid : // TODO
   [C] extends [BooleanClaim] ? BooleanValidation :
   [C] extends [UnknownClaim] ? Valid :
-  [C] extends [NeverClaim] ? Valid : // TODO
+  [C] extends [NeverClaim] ? NotNever :
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
   [C] extends [FieldsClaim<infer Fields>] ? FieldsValidation<Fields, RL> :
@@ -187,6 +190,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isStringClaim(claim)) return validateString(claim, value) as ClaimValidation<C, RL>
   if (isUuidClaim(claim)) return validateUuid(claim, value) as ClaimValidation<C, RL>
   if (isUnknownClaim(claim)) return valid as ClaimValidation<C, RL>
+  if (isNeverClaim(claim)) return notNever as ClaimValidation<C, RL>
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
   if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
