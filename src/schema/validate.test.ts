@@ -21,6 +21,7 @@ import {
   or,
   string,
   tuple,
+  unknown,
   uuid,
 } from './claims'
 
@@ -187,6 +188,12 @@ testValidate(boolean, 0, {}, unexpectedTypeOf('boolean', 0))
 testValidate(boolean, 'true', {}, unexpectedTypeOf('boolean', 'true'))
 testValidate(boolean, null, {}, unexpectedTypeOf('boolean', null))
 testValidate(boolean, undefined, {}, unexpectedTypeOf('boolean', undefined))
+
+//
+// unknown
+
+testValidate(unknown, true, {}, valid)
+testValidate(unknown, 'hello', {}, valid)
 
 //
 // array

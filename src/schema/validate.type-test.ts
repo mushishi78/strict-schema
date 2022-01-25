@@ -28,6 +28,7 @@ import {
   or,
   brand,
   uuid,
+  unknown,
 } from './claims'
 
 import {
@@ -82,6 +83,12 @@ import {
   const claim = boolean
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected = Valid | UnexpectedTypeOf
+  assert<Equals<Actual, Expected>>()
+}
+{
+  const claim = unknown
+  type Actual = ClaimValidation<typeof claim, {}>
+  type Expected = Valid
   assert<Equals<Actual, Expected>>()
 }
 {

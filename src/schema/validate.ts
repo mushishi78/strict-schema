@@ -46,6 +46,7 @@ import {
   isOrClaim,
   isBrandClaim,
   isUuidClaim,
+  isUnknownClaim,
 } from './claims'
 
 import {
@@ -92,7 +93,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [UuidClaim] ? UuidValidation :
   [C] extends [DateStringClaim] ? Valid : // TODO
   [C] extends [BooleanClaim] ? BooleanValidation :
-  [C] extends [UnknownClaim] ? Valid : // TODO
+  [C] extends [UnknownClaim] ? Valid :
   [C] extends [NeverClaim] ? Valid : // TODO
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
@@ -185,6 +186,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isIntegerClaim(claim)) return validateInteger(claim, value) as ClaimValidation<C, RL>
   if (isStringClaim(claim)) return validateString(claim, value) as ClaimValidation<C, RL>
   if (isUuidClaim(claim)) return validateUuid(claim, value) as ClaimValidation<C, RL>
+  if (isUnknownClaim(claim)) return valid as ClaimValidation<C, RL>
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
   if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
