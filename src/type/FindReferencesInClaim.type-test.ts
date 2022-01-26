@@ -22,7 +22,7 @@ import {
   unknown,
   never,
   optionalFieldReference,
-} from './claims'
+} from '../claims'
 
 {
   const claim = constant(256)

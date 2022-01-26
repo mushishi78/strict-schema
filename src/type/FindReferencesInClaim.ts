@@ -24,7 +24,7 @@ import {
   OptionalField,
   DiscriminantField,
   OptionalFieldReference,
-} from './claims'
+} from '../claims'
 
 export type ReferenceLookup<C extends Claim> = LookupFromReferenceTuple<FindReferencesInClaim<C>>
 

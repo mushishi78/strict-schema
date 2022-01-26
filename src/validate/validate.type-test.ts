@@ -31,7 +31,7 @@ import {
   unknown,
   never,
   dateString,
-} from './claims'
+} from '../claims'
 
 import {
   Valid,

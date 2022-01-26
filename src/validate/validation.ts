@@ -1,6 +1,6 @@
 import { NumberRange } from '../lib/number-range'
 import { Constructor } from '../lib/type-helpers'
-import { ContantTypes } from './claims'
+import { ContantTypes } from '../claims'
 
 export type Validation = Valid | Failure
 

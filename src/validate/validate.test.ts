@@ -25,7 +25,7 @@ import {
   tuple,
   unknown,
   uuid,
-} from './claims'
+} from '../claims'
 
 import {
   valid,

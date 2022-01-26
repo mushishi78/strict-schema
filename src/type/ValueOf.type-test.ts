@@ -22,7 +22,7 @@ import {
   never,
   optionalField,
   optionalFieldReference,
-} from './claims'
+} from '../claims'
 
 type FileBrand = { readonly __brand: unique symbol }
 

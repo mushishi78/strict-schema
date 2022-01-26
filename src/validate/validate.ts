@@ -50,7 +50,7 @@ import {
   isUnknownClaim,
   isNeverClaim,
   isDateStringClaim,
-} from './claims'
+} from '../claims'
 
 import {
   valid,

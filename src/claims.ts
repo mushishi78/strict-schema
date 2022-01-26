@@ -1,6 +1,6 @@
-import { NumberRange } from '../lib/number-range'
-import { Constructor } from '../lib/type-helpers'
-import { hasField } from '../lib/unknown'
+import { NumberRange } from './lib/number-range'
+import { Constructor } from './lib/type-helpers'
+import { hasField } from './lib/unknown'
 
 export type Claim =
   | ConstantClaim<any>

@@ -27,7 +27,7 @@ import {
   RegularField,
   OptionalField,
   DiscriminantField,
-} from './claims'
+} from '../claims'
 
 type References = Record<string, any>
 
