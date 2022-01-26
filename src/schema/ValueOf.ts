@@ -11,7 +11,7 @@ import {
   BooleanClaim,
   ArrayClaim,
   TupleClaim,
-  FieldsClaim,
+  RecordClaim,
   BrandClaim,
   InstanceOfClaim,
   OrClaim,
@@ -46,7 +46,7 @@ type _ValueOfClaim<C extends Claim, Refs extends References> =
   C extends NeverClaim ? never :
   C extends ArrayClaim<infer C2> ? Array<ValueOfIndexedClaim<C2, Refs>> :
   C extends TupleClaim<infer Cs> ? ValueOfTuple<Cs, Refs> :
-  C extends FieldsClaim<infer Fields> ? Unite<ValueOfFields<Fields, Refs>> :
+  C extends RecordClaim<infer Fields> ? Unite<ValueOfFields<Fields, Refs>> :
   C extends BrandClaim<infer Brand, infer C2> ? Brand & _ValueOfClaim<C2, Refs> :
   C extends InstanceOfClaim<infer Constructor> ? InstanceType<Constructor> :
   C extends OrClaim<infer Cs> ? _ValueOfClaim<Cs[number], Refs> :

@@ -7,7 +7,7 @@ import {
   brand,
   constant,
   field,
-  fields,
+  record,
   instanceOf,
   integer,
   number,
@@ -93,7 +93,7 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(field('foo', integer()), optionalField('bar', boolean))
+  const claim = record(field('foo', integer()), optionalField('bar', boolean))
   type Actual = ValueOfClaim<typeof claim, {}>
   type Expected = { foo: number; bar?: boolean }
   assert<Equals<Actual, Expected>>()
@@ -118,10 +118,10 @@ type FileBrand = { readonly __brand: unique symbol }
 }
 {
   //prettier-ignore
-  const claim = fields(
+  const claim = record(
     field('foo', integer()),
     optionalField('bar', boolean),
-    field('nested', fields(
+    field('nested', record(
       field('chew', or(integer(), boolean)),
       optionalField('lick', constant(null))
     )))
@@ -153,8 +153,8 @@ type FileBrand = { readonly __brand: unique symbol }
 }
 {
   // prettier-ignore
-  const claim = fields(
-    field('relations', fields(
+  const claim = record(
+    field('relations', record(
       optionalFieldReference('child', 'childRef'),
       field('count', integer()))))
 
@@ -174,12 +174,12 @@ type FileBrand = { readonly __brand: unique symbol }
 }
 {
   const claim = or(
-    fields(
+    record(
       field('type', or(constant('+'), constant('-'))),
       optionalFieldReference('left', 'left'),
       optionalFieldReference('right', 'right')
     ),
-    fields(field('type', constant('num')))
+    record(field('type', constant('num')))
   )
 
   interface ActualLeft {
@@ -201,9 +201,9 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<Actual, Expected>>()
 }
 {
-  const userClaim = fields(field('type', constant('user')), fieldReference('permission', 'permission'))
+  const userClaim = record(field('type', constant('user')), fieldReference('permission', 'permission'))
 
-  const permissionClaim = fields(field('type', constant('permission')), fieldReference('authorizer', 'authorizer'))
+  const permissionClaim = record(field('type', constant('permission')), fieldReference('authorizer', 'authorizer'))
 
   interface IActualPermission {
     permission: ActualPermission

@@ -7,7 +7,7 @@ import {
   brand,
   constant,
   field,
-  fields,
+  record,
   instanceOf,
   integer,
   number,
@@ -115,22 +115,22 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(fieldReference('a', 'node'), field('b', integer()))
+  const claim = record(fieldReference('a', 'node'), field('b', integer()))
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = [FieldReference<'a', 'node'>]
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(field('a', integer()), fieldReference('b', 'pilot'))
+  const claim = record(field('a', integer()), fieldReference('b', 'pilot'))
   type Actual = FindReferencesInClaim<typeof claim>
   type Expected = [FieldReference<'b', 'pilot'>]
   assert<Equals<Actual, Expected>>()
 }
 {
   // prettier-ignore
-  const claim = fields(
+  const claim = record(
     field('a', integer()),
-    field('b', fields(
+    field('b', record(
       field('bi', string()),
       fieldReference('bii?', 'node'))
     )
@@ -158,7 +158,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(fieldReference('a', 'node'), field('b', integer()), optionalFieldReference('b', 'pilot'))
+  const claim = record(fieldReference('a', 'node'), field('b', integer()), optionalFieldReference('b', 'pilot'))
   type Actual = ReferenceLookup<typeof claim>
   type Expected = { node: { a: any }; pilot: { b?: any } }
   assert<Equals<Actual, Expected>>()

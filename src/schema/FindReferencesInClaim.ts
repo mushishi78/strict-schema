@@ -8,7 +8,7 @@ import {
   BooleanClaim,
   ArrayClaim,
   TupleClaim,
-  FieldsClaim,
+  RecordClaim,
   BrandClaim,
   InstanceOfClaim,
   OrClaim,
@@ -52,7 +52,7 @@ export type FindReferencesInClaim<C extends Claim> =
   [C] extends [NeverClaim] ? [] :
   [C] extends [ArrayClaim<infer C2>] ? FindReferencesInIndexedClaim<C2> :
   [C] extends [TupleClaim<infer Cs>] ? FindReferencesInTuple<Cs> :
-  [C] extends [FieldsClaim<infer Fields>] ? FindReferencesInFields<Fields> :
+  [C] extends [RecordClaim<infer Fields>] ? FindReferencesInFields<Fields> :
   [C] extends [BrandClaim<any, infer C2>] ? FindReferencesInClaim<C2> :
   [C] extends [InstanceOfClaim<any>] ? [] :
   [C] extends [OrClaim<infer Cs>] ? FindReferencesInTuple<Cs> :

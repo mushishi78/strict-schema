@@ -16,7 +16,7 @@ import {
   discriminantField,
   field,
   fieldReference,
-  fields,
+  record,
   indexedReference,
   instanceOf,
   integer,
@@ -201,7 +201,7 @@ import {
   }
 }
 {
-  const claim = fields(field('a', integer()), field('b', boolean))
+  const claim = record(field('a', integer()), field('b', boolean))
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected =
     | Valid
@@ -210,7 +210,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(fieldReference('a', 'num'), field('b', boolean))
+  const claim = record(fieldReference('a', 'num'), field('b', boolean))
   const lookup = { num: integer() }
   type Actual = ClaimValidation<typeof claim, typeof lookup>
   type Expected =
@@ -220,7 +220,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(optionalField('a', integer()), field('b', boolean))
+  const claim = record(optionalField('a', integer()), field('b', boolean))
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected =
     | Valid
@@ -229,7 +229,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(optionalFieldReference('a', 'num'), field('b', boolean))
+  const claim = record(optionalFieldReference('a', 'num'), field('b', boolean))
   const lookup = { num: integer() }
   type Actual = ClaimValidation<typeof claim, typeof lookup>
   type Expected =
@@ -239,7 +239,7 @@ import {
   assert<Equals<Actual, Expected>>()
 }
 {
-  const claim = fields(optionalField('a', integer()), field('b', boolean))
+  const claim = record(optionalField('a', integer()), field('b', boolean))
   const validation = validateClaim(claim, { a: 234.5 }, {})
   if (validation.validationType === 'KeyedValidations') {
     const { a, b } = validation.validations
@@ -252,7 +252,7 @@ import {
   }
 }
 {
-  const claim = fields(field('a', integer()), discriminantField('b', boolean))
+  const claim = record(field('a', integer()), discriminantField('b', boolean))
   type Actual = ClaimValidation<typeof claim, {}>
   type Expected =
     | Valid

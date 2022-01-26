@@ -14,7 +14,7 @@ export type Claim =
   | NeverClaim
   | ArrayClaim<any>
   | TupleClaim<any>
-  | FieldsClaim<any>
+  | RecordClaim<any>
   | BrandClaim<any, any>
   | InstanceOfClaim<any>
   | OrClaim<any>
@@ -110,13 +110,15 @@ export const isDiscriminantField = hasField('discriminantField')
 export const isFieldReference = hasField('fieldReference')
 export const isOptionalFieldReference = hasField('optionalFieldReference')
 
-export type FieldsClaim<Fs extends Field[]> = { fields: Fs; exclusive: boolean }
-export const fields = <Fs extends Field[]>(...fields: Fs): FieldsClaim<Fs> => ({ fields, exclusive: false })
-export const exclusiveFields = <Fs extends Field[]>(...fields: Fs): FieldsClaim<Fs> => ({
-  fields,
-  exclusive: true,
+export type RecordClaim<Fs extends Field[]> = { record: { fields: Fs; exclusive: boolean } }
+export const record = <Fs extends Field[]>(...fields: Fs): RecordClaim<Fs> => ({ record: { fields, exclusive: false } })
+export const exclusiveRecord = <Fs extends Field[]>(...fields: Fs): RecordClaim<Fs> => ({
+  record: {
+    fields,
+    exclusive: true,
+  },
 })
-export const isFieldsClaim = hasField('fields')
+export const isRecordClaim = hasField('record')
 
 export type BrandClaim<Brand, C extends Claim> = { branded: C }
 export const brand =

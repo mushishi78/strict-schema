@@ -9,10 +9,10 @@ import {
   constant,
   dateString,
   discriminantField,
-  exclusiveFields,
+  exclusiveRecord,
   field,
   fieldReference,
-  fields,
+  record,
   indexedReference,
   instanceOf,
   integer,
@@ -304,44 +304,44 @@ test('validateClaim throws when an indexedReference is missing in tuple', (t) =>
 })
 
 //
-// fields
+// record
 
-testValidate(fields(field('a', integer())), { a: 23 }, {}, valid)
-testValidate(fields(field('a', integer()), optionalField('b', boolean)), { a: 23 }, {}, valid)
-testValidate(fields(field('a', integer()), optionalField('b', boolean)), { a: 23, b: false }, {}, valid)
-testValidate(fields(fieldReference('a', 'n')), { a: true }, { n: boolean }, valid)
-testValidate(fields(optionalFieldReference('a', 'n')), { a: true }, { n: boolean }, valid)
-testValidate(fields(optionalFieldReference('a', 'n')), {}, { n: boolean }, valid)
-testValidate(fields(field('a', integer())), { a: 23, b: 34 }, {}, valid)
-testValidate(fields(field('a', integer())), { a: 23, b: { c: 'Hello' } }, {}, valid)
+testValidate(record(field('a', integer())), { a: 23 }, {}, valid)
+testValidate(record(field('a', integer()), optionalField('b', boolean)), { a: 23 }, {}, valid)
+testValidate(record(field('a', integer()), optionalField('b', boolean)), { a: 23, b: false }, {}, valid)
+testValidate(record(fieldReference('a', 'n')), { a: true }, { n: boolean }, valid)
+testValidate(record(optionalFieldReference('a', 'n')), { a: true }, { n: boolean }, valid)
+testValidate(record(optionalFieldReference('a', 'n')), {}, { n: boolean }, valid)
+testValidate(record(field('a', integer())), { a: 23, b: 34 }, {}, valid)
+testValidate(record(field('a', integer())), { a: 23, b: { c: 'Hello' } }, {}, valid)
 
-testValidate(fields(field('a', integer())), 23, {}, unexpectedTypeOf('object', 23))
-testValidate(fields(field('a', integer())), [23], {}, unexpectedTypeOf('object', [23]))
-testValidate(fields(field('a', integer())), [{ a: 23 }], {}, unexpectedTypeOf('object', [{ a: 23 }]))
+testValidate(record(field('a', integer())), 23, {}, unexpectedTypeOf('object', 23))
+testValidate(record(field('a', integer())), [23], {}, unexpectedTypeOf('object', [23]))
+testValidate(record(field('a', integer())), [{ a: 23 }], {}, unexpectedTypeOf('object', [{ a: 23 }]))
 
-testValidate(fields(field('a', integer())), { b: 23 }, {}, keyedValidations({ a: missing }, ['b']))
+testValidate(record(field('a', integer())), { b: 23 }, {}, keyedValidations({ a: missing }, ['b']))
 testValidate(
-  fields(field('a', integer()), optionalField('b', boolean)),
+  record(field('a', integer()), optionalField('b', boolean)),
   { b: false },
   {},
   keyedValidations({ a: missing, b: valid }, [])
 )
-testValidate(fields(fieldReference('a', 'n')), { b: 49 }, { n: boolean }, keyedValidations({ a: missing }, ['b']))
+testValidate(record(fieldReference('a', 'n')), { b: 49 }, { n: boolean }, keyedValidations({ a: missing }, ['b']))
 
-testValidate(exclusiveFields(field('a', integer())), { a: 23, b: 'void' }, {}, keyedValidations({ a: valid }, ['b']))
+testValidate(exclusiveRecord(field('a', integer())), { a: 23, b: 'void' }, {}, keyedValidations({ a: valid }, ['b']))
 
-testValidate(fields(field('a', integer())), { a: 23.5 }, {}, keyedValidations({ a: notInteger(23.5) }, []))
+testValidate(record(field('a', integer())), { a: 23.5 }, {}, keyedValidations({ a: notInteger(23.5) }, []))
 
 testValidate(
-  fields(fieldReference('a', 'n')),
+  record(fieldReference('a', 'n')),
   { a: 23.5 },
   { n: integer() },
   keyedValidations({ a: notInteger(23.5) }, [])
 )
-testValidate(fields(fieldReference('a', 'n')), { a: 23 }, { n: integer() }, valid)
+testValidate(record(fieldReference('a', 'n')), { a: 23 }, { n: integer() }, valid)
 
-testValidate(fields(discriminantField('type', constant('status'))), { type: 'stat' }, {}, discriminantInvalid)
-testValidate(fields(discriminantField('type', constant('status'))), { typ: 'status' }, {}, discriminantInvalid)
+testValidate(record(discriminantField('type', constant('status'))), { type: 'stat' }, {}, discriminantInvalid)
+testValidate(record(discriminantField('type', constant('status'))), { typ: 'status' }, {}, discriminantInvalid)
 
 // brand
 
@@ -368,8 +368,8 @@ testValidate(
 )
 testValidate(
   or(
-    fields(discriminantField('type', constant('status')), field('status', number())),
-    fields(discriminantField('type', constant('plate')), field('angle', number()))
+    record(discriminantField('type', constant('status')), field('status', number())),
+    record(discriminantField('type', constant('plate')), field('angle', number()))
   ),
   { type: 'keyboard', keys: 45 },
   {},

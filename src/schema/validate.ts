@@ -23,13 +23,13 @@ import {
   IndexedReference,
   TupleClaim,
   isTupleClaim,
-  FieldsClaim,
+  RecordClaim,
   BrandClaim,
   InstanceOfClaim,
   OrClaim,
   Field,
   FieldReference,
-  isFieldsClaim,
+  isRecordClaim,
   UuidClaim,
   DateStringClaim,
   UnknownClaim,
@@ -102,7 +102,7 @@ export type ClaimValidation<C extends Claim, RL extends ReferenceLookup> =
   [C] extends [NeverClaim] ? NotNever :
   [C] extends [ArrayClaim<infer NestedClaim>] ? ArrayValidation<NestedClaim, RL> :
   [C] extends [TupleClaim<infer NestedClaims>] ? TupleValidation<NestedClaims, RL> :
-  [C] extends [FieldsClaim<infer Fields>] ? FieldsValidation<Fields, RL> :
+  [C] extends [RecordClaim<infer Fields>] ? RecordValidation<Fields, RL> :
   [C] extends [BrandClaim<any, infer NestedClaim>] ? ClaimValidation<NestedClaim, RL> :
   [C] extends [InstanceOfClaim<infer C>] ? InstanceOfValidation<C> :
   [C] extends [OrClaim<infer NestedClaims>] ? OrValidation<NestedClaims, RL> :
@@ -144,7 +144,7 @@ type _ValidationForTupleClaims<Cs extends IndexedClaim[], RL extends ReferenceLo
     [IndexedClaimValidation<C, RL>, ..._ValidationForTupleClaims<Rest, RL>] : [] : [] :
   []
 
-export type FieldsValidation<Fs extends Field[], RL extends ReferenceLookup> =
+export type RecordValidation<Fs extends Field[], RL extends ReferenceLookup> =
   | Valid
   | UnexpectedTypeOf
   | KeyedValidations<_ValidationForFieldClaims<Fs, RL>>
@@ -198,7 +198,7 @@ export function validateClaim<C extends Claim, RL extends ReferenceLookup>(
   if (isBooleanClaim(claim)) return validateBoolean(claim, value) as ClaimValidation<C, RL>
   if (isArrayClaim(claim)) return validateArray(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isTupleClaim(claim)) return validateTuple(claim, value, referenceLookup) as ClaimValidation<C, RL>
-  if (isFieldsClaim(claim)) return validateFields(claim, value, referenceLookup) as ClaimValidation<C, RL>
+  if (isRecordClaim(claim)) return validateRecord(claim, value, referenceLookup) as ClaimValidation<C, RL>
   if (isBrandClaim(claim)) return validateClaim(claim.branded, value, referenceLookup) as ClaimValidation<C, RL>
   if (isInstanceOfClaim(claim)) return validateInstanceOf(claim, value) as ClaimValidation<C, RL>
   if (isOrClaim(claim)) return validateOr(claim, value, referenceLookup) as ClaimValidation<C, RL>
@@ -305,26 +305,26 @@ export function validateTuple<NCs extends IndexedClaim[], RL extends ReferenceLo
   return validations.every(isValid) ? valid : indexedValidations(...validations)
 }
 
-export function validateFields<Fields extends Field[], RL extends ReferenceLookup>(
-  claim: FieldsClaim<Fields>,
+export function validateRecord<Fields extends Field[], RL extends ReferenceLookup>(
+  claim: RecordClaim<Fields>,
   obj: unknown,
   referenceLookup: RL
-): FieldsValidation<Fields, RL> {
+): RecordValidation<Fields, RL> {
   if (!isRecord(obj)) return unexpectedTypeOf('object', obj)
 
   // First check is discriminant's are valid
-  for (const field of claim.fields) {
+  for (const field of claim.record.fields) {
     if (!isFieldDiscriminant(field)) continue
     const key = getFieldKey(field)
 
     // If missing, then invalid by default
-    if (!(key in obj)) return discriminantInvalid as FieldsValidation<Fields, RL>
+    if (!(key in obj)) return discriminantInvalid as RecordValidation<Fields, RL>
 
     // Validate the discriminant claim
     const value = obj[key]
     const claim = getFieldClaim(field, referenceLookup)
     const validation = validateClaim(claim, value, referenceLookup)
-    if (validation !== valid) return discriminantInvalid as FieldsValidation<Fields, RL>
+    if (validation !== valid) return discriminantInvalid as RecordValidation<Fields, RL>
   }
 
   // Then validate other fields
@@ -334,7 +334,7 @@ export function validateFields<Fields extends Field[], RL extends ReferenceLooku
   const expectedKeys: string[] = []
   let isValid = true
 
-  for (const field of claim.fields) {
+  for (const field of claim.record.fields) {
     if (isFieldDiscriminant(field)) continue
 
     const key = getFieldKey(field)
@@ -361,7 +361,7 @@ export function validateFields<Fields extends Field[], RL extends ReferenceLooku
 
   // Collect all the unexpected keys in the object
   const unexpectedKeys = Object.keys(obj).filter((key) => !expectedKeys.includes(key))
-  if (claim.exclusive && unexpectedKeys.length > 0) isValid = false
+  if (claim.record.exclusive && unexpectedKeys.length > 0) isValid = false
 
   // Return validation
   return isValid ? valid : keyedValidations(validations, unexpectedKeys)
