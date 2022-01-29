@@ -227,3 +227,55 @@ type FileBrand = { readonly __brand: unique symbol }
   assert<Equals<ActualUser, ExpectedUser>>()
   assert<Equals<ActualPermission, ExpectedPermission>>()
 }
+{
+  const scheduleClaim = record(
+    field('id', uuid()),
+    field('workflow', or(number(), constant(null))),
+    field('procedure', or(number(), constant(null))),
+    field('subjectUnitId', or(number(), constant(null))),
+    field('timezone', string()),
+    field('startDate', instanceOf(Date)),
+    field('oncePer', or(constant('oncePerTeam'), constant('oncePerUser'), constant('onlyOnce'))),
+    field('allTeams', boolean),
+    field('frequency', constant(null)),
+    field('occurrences', constant(null)),
+    field('endDate', constant(null)),
+    field('dueDate', constant(null)),
+    field('description', string()),
+    field('origin', constant(null)),
+    field('createdAt', instanceOf(Date)),
+    field('createdBy', number()),
+    field('lastModifiedAt', instanceOf(Date)),
+    field('lastModifiedBy', number()),
+    field('isDeleted', boolean),
+    field('showOverdue', boolean),
+    field('createdManually', boolean)
+  )
+
+  type Actual = ValueOfClaim<typeof scheduleClaim, {}>
+
+  interface Expected {
+    id: string
+    workflow: number | null
+    procedure: number | null
+    subjectUnitId: number | null
+    timezone: string
+    startDate: Date
+    oncePer: 'oncePerTeam' | 'oncePerUser' | 'onlyOnce'
+    allTeams: boolean
+    frequency: null
+    occurrences: null
+    endDate: null
+    dueDate: null
+    description: string
+    origin: null
+    createdAt: Date
+    createdBy: number
+    lastModifiedAt: Date
+    lastModifiedBy: number
+    isDeleted: boolean
+    showOverdue: boolean
+    createdManually: boolean
+  }
+  assert<Equals<Actual, Expected>>()
+}
